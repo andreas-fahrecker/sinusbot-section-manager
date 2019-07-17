@@ -64,7 +64,7 @@ registerPlugin({
             ]
         }
     ]
-}, function (sinusbot, config) {
+}, function (_, config, meta) {
     var engine = require('engine');
     var backend = require('backend');
     var event = require('event');

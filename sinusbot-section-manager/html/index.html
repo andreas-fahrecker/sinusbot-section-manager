@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sinusbodropdownt Section Manager</title>
+
+    <link rel="stylesheet" href="css/simplex.css">
+    <link rel="stylesheet" href="css/sweetalert2.min.css">
+    <script src="js/jquery.min.js" lang="js"></script>
+    <script src="js/main.js" lang="js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h1>Sinusbot Section Manager</h1>
+        <a href="/" class="btn btn-primary btn-sm" id="backButton">Back</a>
+    </div>
+    <div class="panel panel-default container">
+        <div class="panel-title">
+            <h2>Sections</h2>
+            <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle" type="button" id="instanceDdl"
+                        data-toggle="dropdown">
+                    Managing Instance&nbsp;
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu instanceDdl" id="ddInstanceList"></ul>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="sectionChannels"></div>
+            <button type="button" id="testButton"></button>
+        </div>
+    </div>
+</div>
+<script src="js/bootstrap.min.js" lang="js"></script>
+<script src="js/sweetalert2.min.js" lang="js"></script>
+</body>
+</html>
