@@ -1,6 +1,6 @@
 .DS_Store
 sinusbot-section-manager/sisema/node_modules/
-sinusbot-section-manager/sisema/dist
+sinusbot-section-manager/html
 
 # local env files
 sinusbot-section-manager/sisema/.env.local

@@ -1,6 +1,5 @@
 # sisema
-Sinusbot Section Manager
-
+app as subpage baseurl
 ## Project setup
 ```
 yarn install
