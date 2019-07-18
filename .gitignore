@@ -1,0 +1,21 @@
+.DS_Store
+sinusbot-section-manager/sisema/node_modules/
+sinusbot-section-manager/sisema/dist
+
+# local env files
+sinusbot-section-manager/sisema/.env.local
+sinusbot-section-manager/sisema/.env.*.local
+
+# Log files
+sinusbot-section-manager/sisema/npm-debug.log*
+sinusbot-section-manager/sisema/yarn-debug.log*
+sinusbot-section-manager/sisema/yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
