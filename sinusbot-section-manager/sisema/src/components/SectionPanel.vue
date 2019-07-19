@@ -1,8 +1,13 @@
 <template>
-    <b-card title="Sections">
+    <b-card>
+        <b-row slot="header">
+            <b-col><h3>Sections</h3></b-col>
+            <b-col>
+                <bot-instance-selection v-bind:selectedBotInstance="activeInstanceUUID"
+                                        v-on:botInstanceSelected="activeInstanceUUID = $event"></bot-instance-selection>
+            </b-col>
+        </b-row>
         <b-card-text>
-            <bot-instance-selection v-bind:selectedBotInstance="activeInstanceUUID"
-                                    v-on:botInstanceSelected="activeInstanceUUID = $event"></bot-instance-selection>
             <channel-section-creator v-bind:selectedBotInstance="activeInstanceUUID"></channel-section-creator>
         </b-card-text>
     </b-card>

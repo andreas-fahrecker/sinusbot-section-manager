@@ -1,17 +1,60 @@
 <template>
     <div>
         <b-form>
-            <b-form-select v-model="selectedSectionParent">
-                <option v-for="tsChannel in tsChannels"
-                        v-bind:value="tsChannel.id">{{tsChannel.name}}
-                </option>
-            </b-form-select>
-            <b-form-input v-model="sectionName" placeholder="Enter the name of the section channels"></b-form-input>
-            <b-form-select v-model="selectedSectionCodec" v-bind:options="codecs"></b-form-select>
-            <b-form-input v-model="selectedSectionCodecQuality" type="range" min="0" max="10"></b-form-input>
-            <b-form-select v-model="selectedSectionEncryption" v-bind:options="encryptedOptions"></b-form-select>
+            <b-form-row>
+                <b-col>
+                    <b-form-group label="Section Parent Channel" label-for="sectionParentInput">
+                        <b-form-select id="sectionParentInput" v-model="sectionChannel.parent">
+                            <option v-for="tsChannel in tsChannels"
+                                    v-bind:value="tsChannel.id">
+                                {{tsChannel.name}}
+                            </option>
+                        </b-form-select>
+                    </b-form-group>
+                </b-col>
+            </b-form-row>
+            <b-form-row>
+                <b-col>
+                    <b-form-group label="Section Name" label-for="sectionNameInput"
+                                  description="A channel number gets added after the name.">
+                        <b-form-input id="sectionNameInput" v-model="sectionChannel.name"
+                                      placeholder="Enter the name of the section channels"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-form-row>
+            <b-form-row>
+                <b-col>
+                    <b-form-group label="Section Codec" label-for="sectionCodecInput">
+                        <b-form-select id="sectionCodecInput" v-model="sectionChannel.codec"
+                                       v-bind:options="codecs"></b-form-select>
+                    </b-form-group>
+                </b-col>
+                <b-col>
+                    <b-form-group label="Section Codec Quality" label-for="sectionCodecQualityInput"
+                                  v-bind:description="'Value: ' + sectionChannel.codecQuality">
+                        <b-form-input id="sectionCodecQualityInput" v-model="sectionChannel.codecQuality" type="range"
+                                      min="0"
+                                      max="10"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-form-row>
+            <b-form-row>
+                <b-col>
+                    <b-form-group label="Voice Encryption" label-for="sectionVoiceEncryptionInput">
+                        <b-form-select id="sectionVoiceEncryptionInput" v-model="sectionChannel.encrypted"
+                                       v-bind:options="encryptedOptions"></b-form-select>
+                    </b-form-group>
+                </b-col>
+            </b-form-row>
+            <b-form-row>
+                <b-col>
+
+                </b-col>
+                <b-col>
+
+                </b-col>
+            </b-form-row>
         </b-form>
-        {{tsChannels}}
     </div>
 </template>
 
@@ -24,8 +67,6 @@
         data() {
             return {
                 tsChannels: null,
-                selectedSectionParent: null,
-                sectionName: null,
                 codecs: [
                     {value: 0, text: 'Speex Schmalband'},
                     {value: 1, text: 'Speex Breitband'},
@@ -34,13 +75,17 @@
                     {value: 4, text: 'Opus Voice'},
                     {value: 5, text: 'Opus Music'}
                 ],
-                selectedSectionCodec: null,
-                selectedSectionCodecQuality: '6',
                 encryptedOptions: [
                     {value: false, text: 'False'},
                     {value: true, text: 'True'}
                 ],
-                selectedSectionEncryption: null
+                sectionChannel: {
+                    name: '',
+                    parent: null,
+                    codec: '4',
+                    codecQuality: '6',
+                    encrypted: false
+                }
             };
         },
         methods: {},
@@ -52,7 +97,7 @@
                     this.tsChannels = response.data.map(channel => {
                         return {
                             id: channel.id,
-                            name: channel.name
+                            name: channel.name.replace(/\[[rcl\*]spacer([0-9]+)\]/, '')
                         }
                     });
                 })
@@ -84,7 +129,12 @@
                         {"id": 4785, "name": "Communism Channel 1"},
                         {"id": 360, "name": "Doki Doki Neko Club - Entrancehall"},
                         {"id": 4751, "name": "Neko Nii 1"}
-                    ];
+                    ].map(channel => {
+                        return {
+                            id: channel.id,
+                            name: channel.name.replace(/\[[rcl\*]spacer([0-9]+)\]/, '')
+                        };
+                    });
                 });
         }
     }
