@@ -1,5 +1,10 @@
 <template>
-    <div>
+    <b-card>
+        <b-row slot="header">
+            <b-col>
+                <h4>New Section</h4>
+            </b-col>
+        </b-row>
         <b-form>
             <b-form-row>
                 <b-col>
@@ -66,11 +71,19 @@
             </b-form-row>
             <b-form-row>
                 <b-col>
-                    <b-button v-on:click="addNewChannelPermission">Add Channel Permission</b-button>
+                    <b-button block v-on:click="addNewChannelPermission">Add Channel Permission</b-button>
+                </b-col>
+                <b-col>
+                    <b-button block v-on:click="removeLastChannelPermission">Remove Last Channel Permission</b-button>
                 </b-col>
             </b-form-row>
         </b-form>
-    </div>
+        <b-row slot="footer">
+            <b-col>
+                <b-button block>Create Channel Section</b-button>
+            </b-col>
+        </b-row>
+    </b-card>
 </template>
 
 <script>
@@ -112,6 +125,9 @@
         methods: {
             addNewChannelPermission() {
                 this.sectionChannel.permissions.push({permissionId: '', permissionValue: null});
+            },
+            removeLastChannelPermission() {
+                this.sectionChannel.permissions.pop();
             }
         },
         mounted() {
