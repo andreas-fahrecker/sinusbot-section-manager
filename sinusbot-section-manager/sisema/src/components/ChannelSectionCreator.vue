@@ -71,10 +71,13 @@
             </b-form-row>
             <b-form-row>
                 <b-col>
-                    <b-button block v-on:click="addNewChannelPermission">Add Channel Permission</b-button>
+                    <b-button block variant="primary" v-on:click="addNewChannelPermission">Add Channel Permission
+                    </b-button>
                 </b-col>
                 <b-col>
-                    <b-button block v-on:click="removeLastChannelPermission">Remove Last Channel Permission</b-button>
+                    <b-button block variant="danger" v-on:click="removeLastChannelPermission"
+                              v-bind:disabled="sectionChannel.permissions.length < 1">Remove Last Channel Permission
+                    </b-button>
                 </b-col>
             </b-form-row>
         </b-form>
@@ -113,12 +116,7 @@
                     codec: '4',
                     codecQuality: '6',
                     encrypted: false,
-                    permissions: [
-                        {
-                            permissionId: 'i_channel_needed_modify_power',
-                            permissionValue: 70
-                        }
-                    ]
+                    permissions: []
                 }
             };
         },
