@@ -15,7 +15,7 @@
 
 <script>
     import BotInstanceSelection from './BotInstanceSelection';
-    import ChannelSectionCreator from './ChannelSectionCreator';
+    import ChannelSectionCreator from './section-creator/ChannelSectionCreator';
 
     export default {
         name: "SectionPanel",
