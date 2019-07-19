@@ -136,7 +136,7 @@
                     this.tsChannels = response.data.map(channel => {
                         return {
                             id: channel.id,
-                            name: channel.name.replace(/\[[rcl*]spacer([0-9]+)\]/, '')
+                            name: channel.name.replace(/\[[rcl*]spacer([0-9]+)]/, '')
                         }
                     });
                 })
@@ -171,7 +171,7 @@
                     ].map(channel => {
                         return {
                             id: channel.id,
-                            name: channel.name.replace(/\[[rcl*]spacer([0-9]+)\]/, '')
+                            name: channel.name.replace(/\[[rcl*]spacer([0-9]+)]/, '')
                         };
                     });
                 });
