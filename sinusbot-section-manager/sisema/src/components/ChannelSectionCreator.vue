@@ -21,11 +21,7 @@
             </b-form-row>
             <b-form-row>
                 <b-col>
-                    <b-form-group label="Section Name" label-for="sectionNameInput"
-                                  description="A channel number gets added after the name.">
-                        <b-form-input id="sectionNameInput" v-model="sectionChannel.name"
-                                      placeholder="Enter the name of the section channels"></b-form-input>
-                    </b-form-group>
+                    <section-name-input v-model="sectionChannel.name"/>
                 </b-col>
             </b-form-row>
             <b-form-row>
@@ -56,7 +52,7 @@
                 <b-col>
                     <b-form-group label="Permission Id" v-bind:label-for="'sectionPermissionId' + index + 'Input'">
                         <b-form-input v-bind:id="'sectionPermissionId' + index + 'Input'"
-                                      v-model="sectionChannel.permissions[index].permissionId"
+                                      v-model="permission.permissionId"
                                       type="text"></b-form-input>
                     </b-form-group>
                 </b-col>
@@ -64,7 +60,7 @@
                     <b-form-group label="Permission Value"
                                   v-bind:label-for="'sectionPermissionValue' + index + 'Input'">
                         <b-form-input v-bind:id="'sectionPermissionValue' + index + 'Input'"
-                                      v-model="sectionChannel.permissions[index].permissionValue"
+                                      v-model="permission.permissionValue"
                                       type="number"></b-form-input>
                     </b-form-group>
                 </b-col>
@@ -81,6 +77,9 @@
                 </b-col>
             </b-form-row>
         </b-form>
+        <b-row>
+            <b-col>{{sectionChannel}}</b-col>
+        </b-row>
         <b-row slot="footer">
             <b-col>
                 <b-button block>Create Channel Section</b-button>
@@ -91,10 +90,16 @@
 
 <script>
     import axios from 'axios';
+    import {BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormInput, BFormSelect, BButton} from 'bootstrap-vue';
+    import SectionNameInput from './SectionNameInput';
 
     export default {
         props: ['selectedBotInstance'],
         name: "ChannelSectionCreator",
+        components: {
+            BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormInput, BFormSelect, BButton,
+            SectionNameInput
+        },
         data() {
             return {
                 tsChannels: null,
