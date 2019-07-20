@@ -2,12 +2,12 @@
     <b-container>
         <b-row>
             <b-col>
-                <TitleComponent/>
+                <title-component/>
             </b-col>
         </b-row>
         <b-row>
             <b-col>
-                <SectionPanel/>
+                <section-panel/>
             </b-col>
         </b-row>
     </b-container>
