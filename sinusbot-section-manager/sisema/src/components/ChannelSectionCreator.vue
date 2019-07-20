@@ -1,11 +1,17 @@
 <template>
-    <div>
+    <b-card>
+        <b-row slot="header">
+            <b-col>
+                <h4>New Section</h4>
+            </b-col>
+        </b-row>
         <b-form>
             <b-form-row>
                 <b-col>
                     <b-form-group label="Section Parent Channel" label-for="sectionParentInput">
                         <b-form-select id="sectionParentInput" v-model="sectionChannel.parent">
                             <option v-for="tsChannel in tsChannels"
+                                    v-bind:key="tsChannel.id"
                                     v-bind:value="tsChannel.id">
                                 {{tsChannel.name}}
                             </option>
@@ -46,16 +52,41 @@
                     </b-form-group>
                 </b-col>
             </b-form-row>
-            <b-form-row>
+            <b-form-row v-for="(permission, index) in sectionChannel.permissions">
                 <b-col>
-
+                    <b-form-group label="Permission Id" v-bind:label-for="'sectionPermissionId' + index + 'Input'">
+                        <b-form-input v-bind:id="'sectionPermissionId' + index + 'Input'"
+                                      v-model="sectionChannel.permissions[index].permissionId"
+                                      type="text"></b-form-input>
+                    </b-form-group>
                 </b-col>
                 <b-col>
-
+                    <b-form-group label="Permission Value"
+                                  v-bind:label-for="'sectionPermissionValue' + index + 'Input'">
+                        <b-form-input v-bind:id="'sectionPermissionValue' + index + 'Input'"
+                                      v-model="sectionChannel.permissions[index].permissionValue"
+                                      type="number"></b-form-input>
+                    </b-form-group>
+                </b-col>
+            </b-form-row>
+            <b-form-row>
+                <b-col>
+                    <b-button block variant="primary" v-on:click="addNewChannelPermission">Add Channel Permission
+                    </b-button>
+                </b-col>
+                <b-col>
+                    <b-button block variant="danger" v-on:click="removeLastChannelPermission"
+                              v-bind:disabled="sectionChannel.permissions.length < 1">Remove Last Channel Permission
+                    </b-button>
                 </b-col>
             </b-form-row>
         </b-form>
-    </div>
+        <b-row slot="footer">
+            <b-col>
+                <b-button block>Create Channel Section</b-button>
+            </b-col>
+        </b-row>
+    </b-card>
 </template>
 
 <script>
@@ -84,11 +115,19 @@
                     parent: null,
                     codec: '4',
                     codecQuality: '6',
-                    encrypted: false
+                    encrypted: false,
+                    permissions: []
                 }
             };
         },
-        methods: {},
+        methods: {
+            addNewChannelPermission() {
+                this.sectionChannel.permissions.push({permissionId: '', permissionValue: null});
+            },
+            removeLastChannelPermission() {
+                this.sectionChannel.permissions.pop();
+            }
+        },
         mounted() {
             axios
                 .get('http://37.120.184.226:8087/api/v1/bot/i/' + this.selectedBotInstance + '/channels',
@@ -97,7 +136,7 @@
                     this.tsChannels = response.data.map(channel => {
                         return {
                             id: channel.id,
-                            name: channel.name.replace(/\[[rcl\*]spacer([0-9]+)\]/, '')
+                            name: channel.name.replace(/\[[rcl*]spacer([0-9]+)]/, '')
                         }
                     });
                 })
@@ -132,7 +171,7 @@
                     ].map(channel => {
                         return {
                             id: channel.id,
-                            name: channel.name.replace(/\[[rcl\*]spacer([0-9]+)\]/, '')
+                            name: channel.name.replace(/\[[rcl*]spacer([0-9]+)]/, '')
                         };
                     });
                 });
