@@ -7,20 +7,31 @@
                                         v-on:botInstanceSelected="activeInstanceUUID = $event"></bot-instance-selection>
             </b-col>
         </b-row>
-        <b-card-text>
-            <channel-section-creator v-bind:selectedBotInstance="activeInstanceUUID"></channel-section-creator>
-        </b-card-text>
+        <b-row>
+            <b-col>
+                <channel-section-editor></channel-section-editor>
+            </b-col>
+        </b-row>
+        <b-row>
+            <b-col>
+                <channel-section-creator v-bind:selectedBotInstance="activeInstanceUUID"></channel-section-creator>
+            </b-col>
+        </b-row>
     </b-card>
 </template>
 
 <script>
+    import {BCard, BRow, BCol} from 'bootstrap-vue';
     import BotInstanceSelection from './BotInstanceSelection';
+    import ChannelSectionEditor from './ChannelSectionEditor';
     import ChannelSectionCreator from './ChannelSectionCreator';
 
     export default {
         name: "SectionPanel",
         components: {
+            BCard, BRow, BCol,
             BotInstanceSelection,
+            ChannelSectionEditor,
             ChannelSectionCreator
         },
         data() {
