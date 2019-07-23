@@ -3,8 +3,8 @@
         <b-row slot="header">
             <b-col><h3>Sections</h3></b-col>
             <b-col>
-                <bot-instance-selection v-bind:selectedBotInstance="activeInstanceUUID"
-                                        v-on:botInstanceSelected="activeInstanceUUID = $event"></bot-instance-selection>
+                <bot-instance-selection :selectedBotInstance="activeInstanceUUID"
+                                        @botInstanceSelected="activeInstanceUUID = $event"/>
             </b-col>
         </b-row>
         <b-row>
@@ -14,7 +14,7 @@
         </b-row>
         <b-row>
             <b-col>
-                <channel-section-creator v-bind:selectedBotInstance="activeInstanceUUID"></channel-section-creator>
+                <channel-section-creator :selectedBotInstance="activeInstanceUUID"/>
             </b-col>
         </b-row>
     </b-card>

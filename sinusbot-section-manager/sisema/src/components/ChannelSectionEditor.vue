@@ -5,22 +5,13 @@
         </b-row>
         <b-form>
             <section-name-input v-model="sectionChannel.name" readonly/>
-            <b-form-row>
-                <b-col>
-                    <section-codec-input v-model="sectionChannel.codec" readonly/>
-                </b-col>
-                <b-col>
-                    <section-codec-quality-input v-model="sectionChannel.codecQuality" readonly/>
-                </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <section-void-encryption-input v-model="sectionChannel.encrypted" readonly/>
-                </b-col>
-            </b-form-row>
+            <section-audio-quality-input :codec="sectionChannel.codec" @update-codec="sectionChannel.codec = $event"
+                                         :codec-quality="sectionChannel.codecQuality"
+                                         @update-codec-quality="sectionChannel.codecQuality = $event" readonly/>
+            <section-void-encryption-input v-model="sectionChannel.encrypted" readonly/>
             <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
-                                      :key="permission.permissionId"
-                                      v-model="sectionChannel.permissions[index]" readonly/>
+                                      :key="permission.permissionId" v-model="sectionChannel.permissions[index]"
+                                      readonly/>
         </b-form>
         <b-row slot="footer">
             <b-col>Edit Button n Stuff</b-col>
@@ -29,20 +20,18 @@
 </template>
 
 <script>
-    import {BCard, BRow, BCol, BForm, BFormRow} from 'bootstrap-vue';
+    import {BCard, BRow, BCol, BForm} from 'bootstrap-vue';
     import SectionNameInput from './section-inputs/SectionNameInput';
-    import SectionCodecInput from './section-inputs/SectionCodecInput';
-    import SectionCodecQualityInput from './section-inputs/SectionCodecQualityInput';
+    import SectionAudioQualityInput from "./section-inputs/SectionAudioQualityInput";
     import SectionVoidEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
     import SectionPermissionInput from './section-inputs/SectionPermissionInput';
 
     export default {
         name: "ChannelSectionEditor",
         components: {
-            BCard, BRow, BCol, BForm, BFormRow,
+            BCard, BRow, BCol, BForm,
             SectionNameInput,
-            SectionCodecInput,
-            SectionCodecQualityInput,
+            SectionAudioQualityInput,
             SectionVoidEncryptionInput,
             SectionPermissionInput
         },

@@ -4,7 +4,7 @@
             <b-form-group label="Section Name" label-for="sectionNameInput"
                           description="A channel number gets added after the name.">
                 <b-form-input id="sectionNameInput" :value="value" @input="updateValue($event)" type="text"
-                              v-bind:readonly="readonly"
+                              :readonly="readonly"
                               placeholder="Enter the name of the section channels"/>
             </b-form-group>
         </b-col>

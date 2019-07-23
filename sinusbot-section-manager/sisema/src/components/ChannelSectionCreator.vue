@@ -11,8 +11,8 @@
                     <b-form-group label="Section Parent Channel" label-for="sectionParentInput">
                         <b-form-select id="sectionParentInput" v-model="sectionChannel.parent">
                             <option v-for="tsChannel in tsChannels"
-                                    v-bind:key="tsChannel.id"
-                                    v-bind:value="tsChannel.id">
+                                    :key="tsChannel.id"
+                                    :value="tsChannel.id">
                                 {{tsChannel.name}}
                             </option>
                         </b-form-select>
@@ -20,30 +20,20 @@
                 </b-col>
             </b-form-row>
             <section-name-input v-model="sectionChannel.name"/>
-            <b-form-row>
-                <b-col>
-                    <section-codec-input v-model="sectionChannel.codec"/>
-                </b-col>
-                <b-col>
-                    <section-codec-quality-input v-model="sectionChannel.codecQuality"/>
-                </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <section-voice-encryption-input v-model="sectionChannel.encrypted"/>
-                </b-col>
-            </b-form-row>
+            <section-audio-quality-input :codec="sectionChannel.codec" @update-codec="sectionChannel.codec = $event"
+                                         :codec-quality="sectionChannel.codecQuality"
+                                         @update-codec-quality="sectionChannel.codecQuality = $event"/>
+            <section-voice-encryption-input v-model="sectionChannel.encrypted"/>
             <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
-                                      :key="permission.permissionId"
-                                      v-model="sectionChannel.permissions[index]"/>
+                                      :key="permission.permissionId" v-model="sectionChannel.permissions[index]"/>
             <b-form-row>
                 <b-col>
-                    <b-button block variant="primary" v-on:click="addNewChannelPermission">Add Channel Permission
+                    <b-button block variant="primary" @click="addNewChannelPermission">Add Channel Permission
                     </b-button>
                 </b-col>
                 <b-col>
-                    <b-button block variant="danger" v-on:click="removeLastChannelPermission"
-                              v-bind:disabled="sectionChannel.permissions.length < 1">Remove Last Channel Permission
+                    <b-button block variant="danger" @click="removeLastChannelPermission"
+                              :disabled="sectionChannel.permissions.length < 1">Remove Last Channel Permission
                     </b-button>
                 </b-col>
             </b-form-row>
@@ -63,8 +53,7 @@
     import axios from 'axios';
     import {BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormSelect, BButton} from 'bootstrap-vue';
     import SectionNameInput from './section-inputs/SectionNameInput';
-    import SectionCodecInput from "./section-inputs/SectionCodecInput";
-    import SectionCodecQualityInput from "./section-inputs/SectionCodecQualityInput";
+    import SectionAudioQualityInput from "./section-inputs/SectionAudioQualityInput";
     import SectionVoiceEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
     import SectionPermissionInput from "./section-inputs/SectionPermissionInput";
 
@@ -72,20 +61,15 @@
         props: ['selectedBotInstance'],
         name: "ChannelSectionCreator",
         components: {
-            SectionPermissionInput,
-            SectionCodecInput,
             BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormSelect, BButton,
             SectionNameInput,
-            SectionCodecQualityInput,
-            SectionVoiceEncryptionInput
+            SectionAudioQualityInput,
+            SectionVoiceEncryptionInput,
+            SectionPermissionInput
         },
         data() {
             return {
                 tsChannels: null,
-                encryptedOptions: [
-                    {value: false, text: 'False'},
-                    {value: true, text: 'True'}
-                ],
                 sectionChannel: {
                     name: '',
                     parent: null,

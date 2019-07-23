@@ -1,8 +1,8 @@
 <template>
     <b-dropdown id="manBotInsDD" text="Managing Bot Instance">
-        <b-dropdown-item-button v-for="botInstance in botInstances"
-                                v-bind:active="selectedBotInstance === botInstance.uuid"
-                                v-on:click="botInsOnClick(botInstance.uuid)">
+        <b-dropdown-item-button v-for="botInstance in botInstances" :key="botInstance.uuid"
+                                :active="selectedBotInstance === botInstance.uuid"
+                                @click="botInsOnClick(botInstance.uuid)">
             {{(botInstance.name ? botInstance.name : botInstance.nick)}}
         </b-dropdown-item-button>
     </b-dropdown>
