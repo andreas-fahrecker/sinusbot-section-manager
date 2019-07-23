@@ -9,7 +9,7 @@
         </b-row>
         <b-row>
             <b-col>
-                <channel-section-editor></channel-section-editor>
+                <channel-section-editor/>
             </b-col>
         </b-row>
         <b-row>
