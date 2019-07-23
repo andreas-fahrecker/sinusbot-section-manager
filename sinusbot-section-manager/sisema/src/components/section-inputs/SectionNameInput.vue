@@ -1,13 +1,18 @@
 <template>
-    <b-form-group label="Section Name" label-for="sectionNameInput"
-                  description="A channel number gets added after the name.">
-        <b-form-input id="sectionNameInput" :value="value" @input="updateValue($event)" v-bind:readonly="readonly"
-                      placeholder="Enter the name of the section channels"></b-form-input>
-    </b-form-group>
+    <b-form-row>
+        <b-col>
+            <b-form-group label="Section Name" label-for="sectionNameInput"
+                          description="A channel number gets added after the name.">
+                <b-form-input id="sectionNameInput" :value="value" @input="updateValue($event)" type="text"
+                              v-bind:readonly="readonly"
+                              placeholder="Enter the name of the section channels"/>
+            </b-form-group>
+        </b-col>
+    </b-form-row>
 </template>
 
 <script>
-    import {BFormGroup, BFormInput} from 'bootstrap-vue';
+    import {BFormRow, BCol, BFormGroup, BFormInput} from 'bootstrap-vue';
 
     export default {
         props: {
@@ -15,7 +20,7 @@
             readonly: {type: Boolean, default: false}
         },
         name: "SectionNameInput",
-        components: {BFormGroup, BFormInput},
+        components: {BFormRow, BCol, BFormGroup, BFormInput},
         data() {
             return {};
         },

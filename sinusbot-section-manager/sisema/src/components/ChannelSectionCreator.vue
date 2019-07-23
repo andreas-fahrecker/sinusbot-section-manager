@@ -19,11 +19,7 @@
                     </b-form-group>
                 </b-col>
             </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <section-name-input v-model="sectionChannel.name"/>
-                </b-col>
-            </b-form-row>
+            <section-name-input v-model="sectionChannel.name"/>
             <b-form-row>
                 <b-col>
                     <section-codec-input v-model="sectionChannel.codec"/>
@@ -37,23 +33,9 @@
                     <section-voice-encryption-input v-model="sectionChannel.encrypted"/>
                 </b-col>
             </b-form-row>
-            <b-form-row v-for="(permission, index) in sectionChannel.permissions">
-                <b-col>
-                    <b-form-group label="Permission Id" v-bind:label-for="'sectionPermissionId' + index + 'Input'">
-                        <b-form-input v-bind:id="'sectionPermissionId' + index + 'Input'"
-                                      v-model="permission.permissionId"
-                                      type="text"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col>
-                    <b-form-group label="Permission Value"
-                                  v-bind:label-for="'sectionPermissionValue' + index + 'Input'">
-                        <b-form-input v-bind:id="'sectionPermissionValue' + index + 'Input'"
-                                      v-model="permission.permissionValue"
-                                      type="number"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-form-row>
+            <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
+                                      :key="permission.permissionId"
+                                      v-model="sectionChannel.permissions[index]"/>
             <b-form-row>
                 <b-col>
                     <b-button block variant="primary" v-on:click="addNewChannelPermission">Add Channel Permission
@@ -79,18 +61,20 @@
 
 <script>
     import axios from 'axios';
-    import {BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormInput, BFormSelect, BButton} from 'bootstrap-vue';
+    import {BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormSelect, BButton} from 'bootstrap-vue';
     import SectionNameInput from './section-inputs/SectionNameInput';
     import SectionCodecInput from "./section-inputs/SectionCodecInput";
     import SectionCodecQualityInput from "./section-inputs/SectionCodecQualityInput";
     import SectionVoiceEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
+    import SectionPermissionInput from "./section-inputs/SectionPermissionInput";
 
     export default {
         props: ['selectedBotInstance'],
         name: "ChannelSectionCreator",
         components: {
+            SectionPermissionInput,
             SectionCodecInput,
-            BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormInput, BFormSelect, BButton,
+            BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormSelect, BButton,
             SectionNameInput,
             SectionCodecQualityInput,
             SectionVoiceEncryptionInput

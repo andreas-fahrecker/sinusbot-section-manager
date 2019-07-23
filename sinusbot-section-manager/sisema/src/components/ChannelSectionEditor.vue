@@ -4,11 +4,7 @@
             <b-col><h4>Section Name</h4></b-col>
         </b-row>
         <b-form>
-            <b-form-row>
-                <b-col>
-                    <section-name-input v-model="sectionChannel.name" readonly/>
-                </b-col>
-            </b-form-row>
+            <section-name-input v-model="sectionChannel.name" readonly/>
             <b-form-row>
                 <b-col>
                     <section-codec-input v-model="sectionChannel.codec" readonly/>
@@ -22,6 +18,9 @@
                     <section-void-encryption-input v-model="sectionChannel.encrypted" readonly/>
                 </b-col>
             </b-form-row>
+            <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
+                                      :key="permission.permissionId"
+                                      v-model="sectionChannel.permissions[index]" readonly/>
         </b-form>
         <b-row slot="footer">
             <b-col>Edit Button n Stuff</b-col>
@@ -35,6 +34,7 @@
     import SectionCodecInput from './section-inputs/SectionCodecInput';
     import SectionCodecQualityInput from './section-inputs/SectionCodecQualityInput';
     import SectionVoidEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
+    import SectionPermissionInput from './section-inputs/SectionPermissionInput';
 
     export default {
         name: "ChannelSectionEditor",
@@ -43,7 +43,8 @@
             SectionNameInput,
             SectionCodecInput,
             SectionCodecQualityInput,
-            SectionVoidEncryptionInput
+            SectionVoidEncryptionInput,
+            SectionPermissionInput
         },
         data() {
             return {
