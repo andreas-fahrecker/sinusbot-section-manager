@@ -9,6 +9,19 @@
                     <section-name-input v-model="sectionChannel.name" readonly/>
                 </b-col>
             </b-form-row>
+            <b-form-row>
+                <b-col>
+                    <section-codec-input v-model="sectionChannel.codec" readonly/>
+                </b-col>
+                <b-col>
+                    <section-codec-quality-input v-model="sectionChannel.codecQuality" readonly/>
+                </b-col>
+            </b-form-row>
+            <b-form-row>
+                <b-col>
+                    <section-void-encryption-input v-model="sectionChannel.encrypted" readonly/>
+                </b-col>
+            </b-form-row>
         </b-form>
         <b-row slot="footer">
             <b-col>Edit Button n Stuff</b-col>
@@ -18,13 +31,19 @@
 
 <script>
     import {BCard, BRow, BCol, BForm, BFormRow} from 'bootstrap-vue';
-    import SectionNameInput from './SectionNameInput';
+    import SectionNameInput from './section-inputs/SectionNameInput';
+    import SectionCodecInput from './section-inputs/SectionCodecInput';
+    import SectionCodecQualityInput from './section-inputs/SectionCodecQualityInput';
+    import SectionVoidEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
 
     export default {
         name: "ChannelSectionEditor",
         components: {
             BCard, BRow, BCol, BForm, BFormRow,
-            SectionNameInput
+            SectionNameInput,
+            SectionCodecInput,
+            SectionCodecQualityInput,
+            SectionVoidEncryptionInput
         },
         data() {
             return {

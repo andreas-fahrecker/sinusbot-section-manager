@@ -1,7 +1,7 @@
 <template>
     <b-form-group label="Section Name" label-for="sectionNameInput"
                   description="A channel number gets added after the name.">
-        <b-form-input id="sectionNameInput" v-model="value" v-bind:readonly="readonly"
+        <b-form-input id="sectionNameInput" :value="value" @input="updateValue($event)" v-bind:readonly="readonly"
                       placeholder="Enter the name of the section channels"></b-form-input>
     </b-form-group>
 </template>
@@ -12,16 +12,16 @@
     export default {
         props: {
             value: {type: String},
-            readonly: {type: Boolean}
+            readonly: {type: Boolean, default: false}
         },
         name: "SectionNameInput",
         components: {BFormGroup, BFormInput},
         data() {
             return {};
         },
-        watch: {
-            value() {
-                this.$emit('input', this.value);
+        methods: {
+            updateValue(value) {
+                this.$emit('input', value);
             }
         }
     }

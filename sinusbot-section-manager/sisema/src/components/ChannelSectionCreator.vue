@@ -26,26 +26,15 @@
             </b-form-row>
             <b-form-row>
                 <b-col>
-                    <b-form-group label="Section Codec" label-for="sectionCodecInput">
-                        <b-form-select id="sectionCodecInput" v-model="sectionChannel.codec"
-                                       v-bind:options="codecs"></b-form-select>
-                    </b-form-group>
+                    <section-codec-input v-model="sectionChannel.codec"/>
                 </b-col>
                 <b-col>
-                    <b-form-group label="Section Codec Quality" label-for="sectionCodecQualityInput"
-                                  v-bind:description="'Value: ' + sectionChannel.codecQuality">
-                        <b-form-input id="sectionCodecQualityInput" v-model="sectionChannel.codecQuality" type="range"
-                                      min="0"
-                                      max="10"></b-form-input>
-                    </b-form-group>
+                    <section-codec-quality-input v-model="sectionChannel.codecQuality"/>
                 </b-col>
             </b-form-row>
             <b-form-row>
                 <b-col>
-                    <b-form-group label="Voice Encryption" label-for="sectionVoiceEncryptionInput">
-                        <b-form-select id="sectionVoiceEncryptionInput" v-model="sectionChannel.encrypted"
-                                       v-bind:options="encryptedOptions"></b-form-select>
-                    </b-form-group>
+                    <section-voice-encryption-input v-model="sectionChannel.encrypted"/>
                 </b-col>
             </b-form-row>
             <b-form-row v-for="(permission, index) in sectionChannel.permissions">
@@ -91,26 +80,24 @@
 <script>
     import axios from 'axios';
     import {BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormInput, BFormSelect, BButton} from 'bootstrap-vue';
-    import SectionNameInput from './SectionNameInput';
+    import SectionNameInput from './section-inputs/SectionNameInput';
+    import SectionCodecInput from "./section-inputs/SectionCodecInput";
+    import SectionCodecQualityInput from "./section-inputs/SectionCodecQualityInput";
+    import SectionVoiceEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
 
     export default {
         props: ['selectedBotInstance'],
         name: "ChannelSectionCreator",
         components: {
+            SectionCodecInput,
             BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormInput, BFormSelect, BButton,
-            SectionNameInput
+            SectionNameInput,
+            SectionCodecQualityInput,
+            SectionVoiceEncryptionInput
         },
         data() {
             return {
                 tsChannels: null,
-                codecs: [
-                    {value: 0, text: 'Speex Schmalband'},
-                    {value: 1, text: 'Speex Breitband'},
-                    {value: 2, text: 'Speex Ultra-Breitband'},
-                    {value: 3, text: 'CELT Mono'},
-                    {value: 4, text: 'Opus Voice'},
-                    {value: 5, text: 'Opus Music'}
-                ],
                 encryptedOptions: [
                     {value: false, text: 'False'},
                     {value: true, text: 'True'}
