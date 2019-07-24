@@ -4,14 +4,15 @@
             <b-col><h4>Section Name</h4></b-col>
         </b-row>
         <b-form>
-            <section-name-input v-model="sectionChannel.name" readonly/>
+            <section-name-input v-model="sectionChannel.name" :readonly="viewMode"/>
             <section-audio-quality-input :codec="sectionChannel.codec" @update-codec="sectionChannel.codec = $event"
                                          :codec-quality="sectionChannel.codecQuality"
-                                         @update-codec-quality="sectionChannel.codecQuality = $event" readonly/>
-            <section-void-encryption-input v-model="sectionChannel.encrypted" readonly/>
+                                         @update-codec-quality="sectionChannel.codecQuality = $event"
+                                         :readonly="viewMode"/>
+            <section-void-encryption-input v-model="sectionChannel.encrypted" :readonly="viewMode"/>
             <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
                                       :key="index" v-model="sectionChannel.permissions[index]"
-                                      readonly/>
+                                      :readonly="viewMode"/>
         </b-form>
         <b-row slot="footer">
             <b-col>Edit Button n Stuff</b-col>
@@ -47,7 +48,8 @@
                         new SectionPermission('i_ft_needed_file_rename_power', '70'),
                         new SectionPermission('i_ft_needed_file_browse_power', '70'),
                         new SectionPermission('i_ft_needed_directory_create_power', '70')
-                    ])
+                    ]),
+                viewMode: true
             };
         },
         methods: {}
