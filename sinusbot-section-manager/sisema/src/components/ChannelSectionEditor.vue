@@ -10,7 +10,7 @@
                                          @update-codec-quality="sectionChannel.codecQuality = $event" readonly/>
             <section-void-encryption-input v-model="sectionChannel.encrypted" readonly/>
             <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
-                                      :key="permission.permissionId" v-model="sectionChannel.permissions[index]"
+                                      :key="index" v-model="sectionChannel.permissions[index]"
                                       readonly/>
         </b-form>
         <b-row slot="footer">
@@ -20,16 +20,16 @@
 </template>
 
 <script>
-    import {BCard, BRow, BCol, BForm} from 'bootstrap-vue';
     import SectionNameInput from './section-inputs/SectionNameInput';
     import SectionAudioQualityInput from "./section-inputs/SectionAudioQualityInput";
     import SectionVoidEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
     import SectionPermissionInput from './section-inputs/SectionPermissionInput';
+    import SectionChannel from "../model/SectionChannel";
+    import SectionPermission from "../model/SectionPermission";
 
     export default {
         name: "ChannelSectionEditor",
         components: {
-            BCard, BRow, BCol, BForm,
             SectionNameInput,
             SectionAudioQualityInput,
             SectionVoidEncryptionInput,
@@ -37,39 +37,17 @@
         },
         data() {
             return {
-                sectionChannel: {
-                    name: "Talking",
-                    parent: 8,
-                    codec: "4",
-                    codecQuality: "10",
-                    encrypted: true,
-                    permissions: [
-                        {
-                            permissionId: "i_channel_needed_modify_power", permissionValue: "70"
-                        },
-                        {
-                            permissionId: "i_channel_needed_delete_power", permissionValue: "50"
-                        },
-                        {
-                            permissionId: "i_channel_needed_permission_modify_power", permissionValue: "70"
-                        },
-                        {
-                            permissionId: "i_ft_needed_file_upload_power", permissionValue: "70"
-                        },
-                        {
-                            permissionId: "i_ft_needed_file_download_power", permissionValue: "70"
-                        },
-                        {
-                            permissionId: "i_ft_needed_file_rename_power", permissionValue: "70"
-                        },
-                        {
-                            permissionId: "i_ft_needed_file_browse_power", permissionValue: "70"
-                        },
-                        {
-                            permissionId: "i_ft_needed_directory_create_power", permissionValue: "70"
-                        }
-                    ]
-                }
+                sectionChannel: new SectionChannel('Talking', 8, '4', '10', true,
+                    [
+                        new SectionPermission('i_channel_needed_modify_power', '70'),
+                        new SectionPermission('i_channel_needed_delete_power', '50'),
+                        new SectionPermission('i_channel_needed_permission_modify_power', '70'),
+                        new SectionPermission('i_ft_needed_file_upload_power', '70'),
+                        new SectionPermission('i_ft_needed_file_download_power', '70'),
+                        new SectionPermission('i_ft_needed_file_rename_power', '70'),
+                        new SectionPermission('i_ft_needed_file_browse_power', '70'),
+                        new SectionPermission('i_ft_needed_directory_create_power', '70')
+                    ])
             };
         },
         methods: {}

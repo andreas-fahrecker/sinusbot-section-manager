@@ -25,7 +25,7 @@
                                          @update-codec-quality="sectionChannel.codecQuality = $event"/>
             <section-voice-encryption-input v-model="sectionChannel.encrypted"/>
             <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
-                                      :key="permission.permissionId" v-model="sectionChannel.permissions[index]"/>
+                                      :key="index" v-model="sectionChannel.permissions[index]"/>
             <b-form-row>
                 <b-col>
                     <b-button block variant="primary" @click="addNewChannelPermission">Add Channel Permission
@@ -51,17 +51,17 @@
 
 <script>
     import axios from 'axios';
-    import {BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormSelect, BButton} from 'bootstrap-vue';
     import SectionNameInput from './section-inputs/SectionNameInput';
     import SectionAudioQualityInput from "./section-inputs/SectionAudioQualityInput";
     import SectionVoiceEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
     import SectionPermissionInput from "./section-inputs/SectionPermissionInput";
+    import SectionChannel from "../model/SectionChannel";
+    import SectionPermission from "../model/SectionPermission";
 
     export default {
         props: ['selectedBotInstance'],
         name: "ChannelSectionCreator",
         components: {
-            BCard, BRow, BCol, BForm, BFormRow, BFormGroup, BFormSelect, BButton,
             SectionNameInput,
             SectionAudioQualityInput,
             SectionVoiceEncryptionInput,
@@ -70,19 +70,12 @@
         data() {
             return {
                 tsChannels: null,
-                sectionChannel: {
-                    name: '',
-                    parent: null,
-                    codec: '4',
-                    codecQuality: '6',
-                    encrypted: false,
-                    permissions: []
-                }
+                sectionChannel: new SectionChannel('', null, '4', '6', false, [])
             };
         },
         methods: {
             addNewChannelPermission() {
-                this.sectionChannel.permissions.push({permissionId: '', permissionValue: null});
+                this.sectionChannel.permissions.push(new SectionPermission('', null));
             },
             removeLastChannelPermission() {
                 this.sectionChannel.permissions.pop();
