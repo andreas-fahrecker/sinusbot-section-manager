@@ -1,19 +1,24 @@
 <template>
     <b-dropdown id="manBotInsDD" text="Managing Bot Instance">
-        <b-dropdown-item v-for="botInstance in botInstances"
-                         v-bind:active="selectedBotInstance === botInstance.uuid"
-                         v-on:click="botInsOnClick(botInstance.uuid)">
+        <b-dropdown-item-button v-for="botInstance in botInstances" :key="botInstance.uuid"
+                                :active="selectedBotInstance === botInstance.uuid"
+                                @click="botInsOnClick(botInstance.uuid)">
             {{(botInstance.name ? botInstance.name : botInstance.nick)}}
-        </b-dropdown-item>
+        </b-dropdown-item-button>
     </b-dropdown>
 </template>
 
 <script>
     import axios from 'axios';
+    import {BDropdown, BDropdownItemButton} from 'bootstrap-vue';
 
     export default {
         props: ['selectedBotInstance'],
         name: "BotInstanceSelection",
+        components: {
+            BDropdown,
+            BDropdownItemButton
+        },
         data() {
             return {
                 botInstances: null

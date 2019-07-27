@@ -11,76 +11,36 @@
                     <b-form-group label="Section Parent Channel" label-for="sectionParentInput">
                         <b-form-select id="sectionParentInput" v-model="sectionChannel.parent">
                             <option v-for="tsChannel in tsChannels"
-                                    v-bind:key="tsChannel.id"
-                                    v-bind:value="tsChannel.id">
+                                    :key="tsChannel.id"
+                                    :value="tsChannel.id">
                                 {{tsChannel.name}}
                             </option>
                         </b-form-select>
                     </b-form-group>
                 </b-col>
             </b-form-row>
+            <section-name-input v-model="sectionChannel.name"/>
+            <section-audio-quality-input :codec="sectionChannel.codec" @update-codec="sectionChannel.codec = $event"
+                                         :codec-quality="sectionChannel.codecQuality"
+                                         @update-codec-quality="sectionChannel.codecQuality = $event"/>
+            <section-voice-encryption-input v-model="sectionChannel.encrypted"/>
+            <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
+                                      :key="index" v-model="sectionChannel.permissions[index]"/>
             <b-form-row>
                 <b-col>
-                    <b-form-group label="Section Name" label-for="sectionNameInput"
-                                  description="A channel number gets added after the name.">
-                        <b-form-input id="sectionNameInput" v-model="sectionChannel.name"
-                                      placeholder="Enter the name of the section channels"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <b-form-group label="Section Codec" label-for="sectionCodecInput">
-                        <b-form-select id="sectionCodecInput" v-model="sectionChannel.codec"
-                                       v-bind:options="codecs"></b-form-select>
-                    </b-form-group>
-                </b-col>
-                <b-col>
-                    <b-form-group label="Section Codec Quality" label-for="sectionCodecQualityInput"
-                                  v-bind:description="'Value: ' + sectionChannel.codecQuality">
-                        <b-form-input id="sectionCodecQualityInput" v-model="sectionChannel.codecQuality" type="range"
-                                      min="0"
-                                      max="10"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <b-form-group label="Voice Encryption" label-for="sectionVoiceEncryptionInput">
-                        <b-form-select id="sectionVoiceEncryptionInput" v-model="sectionChannel.encrypted"
-                                       v-bind:options="encryptedOptions"></b-form-select>
-                    </b-form-group>
-                </b-col>
-            </b-form-row>
-            <b-form-row v-for="(permission, index) in sectionChannel.permissions">
-                <b-col>
-                    <b-form-group label="Permission Id" v-bind:label-for="'sectionPermissionId' + index + 'Input'">
-                        <b-form-input v-bind:id="'sectionPermissionId' + index + 'Input'"
-                                      v-model="sectionChannel.permissions[index].permissionId"
-                                      type="text"></b-form-input>
-                    </b-form-group>
-                </b-col>
-                <b-col>
-                    <b-form-group label="Permission Value"
-                                  v-bind:label-for="'sectionPermissionValue' + index + 'Input'">
-                        <b-form-input v-bind:id="'sectionPermissionValue' + index + 'Input'"
-                                      v-model="sectionChannel.permissions[index].permissionValue"
-                                      type="number"></b-form-input>
-                    </b-form-group>
-                </b-col>
-            </b-form-row>
-            <b-form-row>
-                <b-col>
-                    <b-button block variant="primary" v-on:click="addNewChannelPermission">Add Channel Permission
+                    <b-button block variant="primary" @click="addNewChannelPermission">Add Channel Permission
                     </b-button>
                 </b-col>
                 <b-col>
-                    <b-button block variant="danger" v-on:click="removeLastChannelPermission"
-                              v-bind:disabled="sectionChannel.permissions.length < 1">Remove Last Channel Permission
+                    <b-button block variant="danger" @click="removeLastChannelPermission"
+                              :disabled="sectionChannel.permissions.length < 1">Remove Last Channel Permission
                     </b-button>
                 </b-col>
             </b-form-row>
         </b-form>
+        <b-row>
+            <b-col>{{sectionChannel}}</b-col>
+        </b-row>
         <b-row slot="footer">
             <b-col>
                 <b-button block>Create Channel Section</b-button>
@@ -91,38 +51,31 @@
 
 <script>
     import axios from 'axios';
+    import SectionNameInput from './section-inputs/SectionNameInput';
+    import SectionAudioQualityInput from "./section-inputs/SectionAudioQualityInput";
+    import SectionVoiceEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
+    import SectionPermissionInput from "./section-inputs/SectionPermissionInput";
+    import SectionChannel from "../model/SectionChannel";
+    import SectionPermission from "../model/SectionPermission";
 
     export default {
         props: ['selectedBotInstance'],
         name: "ChannelSectionCreator",
+        components: {
+            SectionNameInput,
+            SectionAudioQualityInput,
+            SectionVoiceEncryptionInput,
+            SectionPermissionInput
+        },
         data() {
             return {
                 tsChannels: null,
-                codecs: [
-                    {value: 0, text: 'Speex Schmalband'},
-                    {value: 1, text: 'Speex Breitband'},
-                    {value: 2, text: 'Speex Ultra-Breitband'},
-                    {value: 3, text: 'CELT Mono'},
-                    {value: 4, text: 'Opus Voice'},
-                    {value: 5, text: 'Opus Music'}
-                ],
-                encryptedOptions: [
-                    {value: false, text: 'False'},
-                    {value: true, text: 'True'}
-                ],
-                sectionChannel: {
-                    name: '',
-                    parent: null,
-                    codec: '4',
-                    codecQuality: '6',
-                    encrypted: false,
-                    permissions: []
-                }
+                sectionChannel: new SectionChannel('', null, '4', '6', false, [])
             };
         },
         methods: {
             addNewChannelPermission() {
-                this.sectionChannel.permissions.push({permissionId: '', permissionValue: null});
+                this.sectionChannel.permissions.push(new SectionPermission('', null));
             },
             removeLastChannelPermission() {
                 this.sectionChannel.permissions.pop();
