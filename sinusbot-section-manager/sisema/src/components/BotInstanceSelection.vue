@@ -41,7 +41,6 @@
                     if (this.botInstances.length === 1) {
                         this.botInstanceSelect(this.botInstances[0].uuid);
                     }
-                    console.log('botInstances: ' + JSON.stringify(this.botInstances));
                 })
                 .finally(() => {
                     if (process.env.NODE_ENV === 'development') {
