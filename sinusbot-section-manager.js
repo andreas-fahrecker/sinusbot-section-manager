@@ -18,25 +18,27 @@ registerPlugin({
     const backend = require('backend');
     const event = require('event');
 
-    /*
-    channelPermission = {
-        permId: 'string',
-        permValue: 'number'
-    };
-    channelSection = {
-        id: 'number',
-        sectionChannelParent: 'channelId',
-        name: 'string',
-        codec: 'number',
-        quality: 'number',
-        maxClients: 'number',
-        enc: '1 = encrypted',
-        channelPermissions: [channelPermission]
-    };
-    */
-
     function getChannelSections() {
         return store.get(storeKeys.channelSections);
+    }
+
+    function getChannelSection(channelParentId) {
+        return store.get(storeKeys.channelSections).filter(channelSection => channelSection.parent === channelParentId);
+    }
+
+    function saveChannelSection(sectionChannel) {
+        let channelSectionUpdated = false;
+        let channelSections = getChannelSections();
+        for (let i = 0; i < channelSections.length; i++) {
+            if (channelSections[i].parent === sectionChannel.parent) {
+                channelSections[i] = sectionChannel;
+                channelSectionUpdated = true;
+            }
+        }
+        if (!channelSectionUpdated) {
+            channelSections.push(sectionChannel);
+        }
+        store.set(storeKeys.channelSections, channelSections);
     }
 
     /**
