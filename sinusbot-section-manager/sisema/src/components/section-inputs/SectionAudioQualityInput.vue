@@ -21,8 +21,6 @@
 </template>
 
 <script>
-    import {BFormRow, BCol, BFormGroup, BFormSelect, BFormInput} from 'bootstrap-vue';
-
     export default {
         props: {
             codec: {type: String},
@@ -30,7 +28,6 @@
             readonly: {type: Boolean, default: false}
         },
         name: "SectionAudioQualityInput",
-        components: {BFormRow, BCol, BFormGroup, BFormSelect, BFormInput},
         data() {
             return {
                 codecs: [
