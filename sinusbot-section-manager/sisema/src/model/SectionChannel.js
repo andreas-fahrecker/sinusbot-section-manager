@@ -8,4 +8,7 @@ export default class SectionChannel {
         this.permissions = permissions;
     }
 
+    validateSectionChannelName() {
+        return Boolean(this.name.trim());
+    }
 }

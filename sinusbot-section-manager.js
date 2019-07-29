@@ -26,6 +26,11 @@ registerPlugin({
         return store.get(storeKeys.channelSections).filter(channelSection => channelSection.parent === channelParentId);
     }
 
+    function validateChannelSectionName(channelSection) {
+        engine.log('Channel Section: ' + channelSection);
+        return channelSection.name ? Boolean(channelSection.name.trim()) : false;
+    }
+
     function saveChannelSection(sectionChannel) {
         let channelSectionUpdated = false;
         let channelSections = getChannelSections();
@@ -45,7 +50,8 @@ registerPlugin({
      *
      */
     event.on('api:createChannelSection', ev => {
-        engine.log(ev.data().channel);
+        let channelSection = JSON.parse(ev.data().channelSection);
+        engine.log('Channel Section Name Valid: ' + validateChannelSectionName(channelSection));
     });
 
     event.on('api:getChannelSections', ev => {

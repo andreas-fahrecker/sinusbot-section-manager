@@ -29,9 +29,12 @@
         <b-row>
             <b-col>{{sectionChannel}}</b-col>
         </b-row>
+        <b-row>
+            <b-col>{{sectionChannel.validateSectionChannelName()}}</b-col>
+        </b-row>
         <b-row slot="footer">
             <b-col>
-                <b-button block>Create Channel Section</b-button>
+                <b-button block @click="createChannelSection">Create Channel Section</b-button>
             </b-col>
         </b-row>
     </b-card>
@@ -68,6 +71,14 @@
             },
             removeLastChannelPermission() {
                 this.sectionChannel.permissions.pop();
+            },
+            createChannelSection() {
+                axios
+                    .post(process.env.VUE_APP_DOMAIN + 'api/v1/bot/i/' + this.selectedBotInstance + '/event/createChannelSection',
+                        {channelSection: JSON.stringify(this.sectionChannel)},
+                        {headers: {'Authorization': 'bearer ' + window.localStorage.token}}
+                    )
+                    .then(response => console.log(JSON.stringify(response)));
             }
         }
     }
