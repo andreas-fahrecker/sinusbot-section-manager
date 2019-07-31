@@ -21,20 +21,20 @@
 <script>
     export default {
         props: {
-            codec: {type: String},
-            codecQuality: {type: String},
+            codec: {type: Number},
+            codecQuality: {type: Number},
             readonly: {type: Boolean, default: false}
         },
         name: "SectionAudioQualityInput",
         data() {
             return {
                 codecs: [
-                    {value: '0', text: 'Speex Schmalband'},
-                    {value: '1', text: 'Speex Breitband'},
-                    {value: '2', text: 'Speex Ultra-Breitband'},
-                    {value: '3', text: 'CELT Mono'},
-                    {value: '4', text: 'Opus Voice'},
-                    {value: '5', text: 'Opus Music'}
+                    {value: 0, text: 'Speex Schmalband'},
+                    {value: 1, text: 'Speex Breitband'},
+                    {value: 2, text: 'Speex Ultra-Breitband'},
+                    {value: 3, text: 'CELT Mono'},
+                    {value: 4, text: 'Opus Voice'},
+                    {value: 5, text: 'Opus Music'}
                 ]
             };
         },

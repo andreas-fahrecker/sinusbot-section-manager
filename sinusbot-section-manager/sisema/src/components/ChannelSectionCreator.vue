@@ -6,14 +6,14 @@
             </b-col>
         </b-row>
         <b-form>
-            <section-parent-channel-input v-model="sectionChannel.parent" :selectedBotInstance="selectedBotInstance"/>
-            <section-name-input v-model="sectionChannel.name"/>
-            <section-audio-quality-input :codec="sectionChannel.codec" @update-codec="sectionChannel.codec = $event"
-                                         :codec-quality="sectionChannel.codecQuality"
-                                         @update-codec-quality="sectionChannel.codecQuality = $event"/>
-            <section-voice-encryption-input v-model="sectionChannel.encrypted"/>
-            <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
-                                      :key="index" v-model="sectionChannel.permissions[index]"/>
+            <section-parent-channel-input v-model="channelSection.parent" :selectedBotInstance="selectedBotInstance"/>
+            <section-name-input v-model="channelSection.name"/>
+            <section-audio-quality-input :codec="channelSection.codec" @update-codec="channelSection.codec = $event"
+                                         :codec-quality="channelSection.codecQuality"
+                                         @update-codec-quality="channelSection.codecQuality = $event"/>
+            <section-voice-encryption-input v-model="channelSection.encrypted"/>
+            <section-permission-input v-for="(permission, index) in channelSection.permissions"
+                                      :key="index" v-model="channelSection.permissions[index]"/>
             <b-form-row>
                 <b-col>
                     <b-button block variant="primary" @click="addNewChannelPermission">Add Channel Permission
@@ -21,16 +21,13 @@
                 </b-col>
                 <b-col>
                     <b-button block variant="danger" @click="removeLastChannelPermission"
-                              :disabled="sectionChannel.permissions.length < 1">Remove Last Channel Permission
+                              :disabled="channelSection.permissions.length < 1">Remove Last Channel Permission
                     </b-button>
                 </b-col>
             </b-form-row>
         </b-form>
         <b-row>
-            <b-col>{{sectionChannel}}</b-col>
-        </b-row>
-        <b-row>
-            <b-col>{{sectionChannel.validateSectionChannelName()}}</b-col>
+            <b-col>{{channelSection}}</b-col>
         </b-row>
         <b-row slot="footer">
             <b-col>
@@ -47,8 +44,8 @@
     import SectionAudioQualityInput from "./section-inputs/SectionAudioQualityInput";
     import SectionVoiceEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
     import SectionPermissionInput from "./section-inputs/SectionPermissionInput";
-    import SectionChannel from "../model/SectionChannel";
-    import SectionPermission from "../model/SectionPermission";
+    import ChannelSection from "../model/ChannelSection";
+    import ChannelPermission from "../model/ChannelPermission";
 
     export default {
         props: ['selectedBotInstance'],
@@ -62,20 +59,20 @@
         },
         data() {
             return {
-                sectionChannel: new SectionChannel('', null, '4', '6', false, [])
+                channelSection: new ChannelSection('', null, 4, 6, false, [])
             };
         },
         methods: {
             addNewChannelPermission() {
-                this.sectionChannel.permissions.push(new SectionPermission('', null));
+                this.channelSection.permissions.push(new ChannelPermission('', null));
             },
             removeLastChannelPermission() {
-                this.sectionChannel.permissions.pop();
+                this.channelSection.permissions.pop();
             },
             createChannelSection() {
                 axios
                     .post(process.env.VUE_APP_DOMAIN + 'api/v1/bot/i/' + this.selectedBotInstance + '/event/createChannelSection',
-                        {channelSection: JSON.stringify(this.sectionChannel)},
+                        {channelSection: JSON.stringify(this.channelSection)},
                         {headers: {'Authorization': 'bearer ' + window.localStorage.token}}
                     )
                     .then(response => console.log(JSON.stringify(response)));

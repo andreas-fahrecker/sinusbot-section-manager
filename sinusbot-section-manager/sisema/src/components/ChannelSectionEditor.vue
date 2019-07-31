@@ -4,14 +4,14 @@
             <b-col><h4>Section Name</h4></b-col>
         </b-row>
         <b-form>
-            <section-name-input v-model="sectionChannel.name" :readonly="viewMode"/>
-            <section-audio-quality-input :codec="sectionChannel.codec" @update-codec="sectionChannel.codec = $event"
-                                         :codec-quality="sectionChannel.codecQuality"
-                                         @update-codec-quality="sectionChannel.codecQuality = $event"
+            <section-name-input v-model="channelSection.name" :readonly="viewMode"/>
+            <section-audio-quality-input :codec="channelSection.codec" @update-codec="channelSection.codec = $event"
+                                         :codec-quality="channelSection.codecQuality"
+                                         @update-codec-quality="channelSection.codecQuality = $event"
                                          :readonly="viewMode"/>
-            <section-void-encryption-input v-model="sectionChannel.encrypted" :readonly="viewMode"/>
-            <section-permission-input v-for="(permission, index) in sectionChannel.permissions"
-                                      :key="index" v-model="sectionChannel.permissions[index]"
+            <section-void-encryption-input v-model="channelSection.encrypted" :readonly="viewMode"/>
+            <section-permission-input v-for="(permission, index) in channelSection.permissions"
+                                      :key="index" v-model="channelSection.permissions[index]"
                                       :readonly="viewMode"/>
         </b-form>
         <b-row v-if="viewMode" slot="footer">
@@ -38,8 +38,8 @@
     import SectionAudioQualityInput from "./section-inputs/SectionAudioQualityInput";
     import SectionVoidEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
     import SectionPermissionInput from './section-inputs/SectionPermissionInput';
-    import SectionChannel from "../model/SectionChannel";
-    import SectionPermission from "../model/SectionPermission";
+    import ChannelSection from "../model/ChannelSection";
+    import ChannelPermission from "../model/ChannelPermission";
 
     export default {
         name: "ChannelSectionEditor",
@@ -51,16 +51,16 @@
         },
         data() {
             return {
-                sectionChannel: new SectionChannel('Talking', 8, '4', '10', true,
+                channelSection: new ChannelSection('Talking', 8, 4, 10, true,
                     [
-                        new SectionPermission('i_channel_needed_modify_power', '70'),
-                        new SectionPermission('i_channel_needed_delete_power', '50'),
-                        new SectionPermission('i_channel_needed_permission_modify_power', '70'),
-                        new SectionPermission('i_ft_needed_file_upload_power', '70'),
-                        new SectionPermission('i_ft_needed_file_download_power', '70'),
-                        new SectionPermission('i_ft_needed_file_rename_power', '70'),
-                        new SectionPermission('i_ft_needed_file_browse_power', '70'),
-                        new SectionPermission('i_ft_needed_directory_create_power', '70')
+                        new ChannelPermission('i_channel_needed_modify_power', '70'),
+                        new ChannelPermission('i_channel_needed_delete_power', '50'),
+                        new ChannelPermission('i_channel_needed_permission_modify_power', '70'),
+                        new ChannelPermission('i_ft_needed_file_upload_power', '70'),
+                        new ChannelPermission('i_ft_needed_file_download_power', '70'),
+                        new ChannelPermission('i_ft_needed_file_rename_power', '70'),
+                        new ChannelPermission('i_ft_needed_file_browse_power', '70'),
+                        new ChannelPermission('i_ft_needed_directory_create_power', '70')
                     ]),
                 viewMode: true
             };

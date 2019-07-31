@@ -17,11 +17,11 @@
 
 <script>
     import {BFormRow, BFormGroup, BFormInput} from 'bootstrap-vue';
-    import SectionPermission from "../../model/SectionPermission";
+    import ChannelPermission from "../../model/ChannelPermission";
 
     export default {
         props: {
-            value: {type: SectionPermission},
+            value: {type: ChannelPermission},
             readonly: {type: Boolean, default: false}
         },
         name: "SectionPermissionInput",
@@ -31,11 +31,11 @@
         },
         methods: {
             updatePermissionId(permId) {
-                const permission = new SectionPermission(permId, this.value.value);
+                const permission = new ChannelPermission(permId, this.value.value);
                 this.$emit('input', permission);
             },
             updatePermissionValue(permValue) {
-                const permission = new SectionPermission(this.value.id, permValue);
+                const permission = new ChannelPermission(this.value.id, permValue);
                 this.$emit('input', permission);
             }
         }
