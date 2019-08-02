@@ -2,6 +2,7 @@
 sinusbot-section-manager/sisema/node_modules/
 sinusbot-section-manager/html
 node_modules/
+sinusbot-section-manager.js
 
 # Vue-Project local env files
 sinusbot-section-manager/sisema/.env.local
