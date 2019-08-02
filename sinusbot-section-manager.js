@@ -125,32 +125,32 @@ registerPlugin({
     const backend = require('backend');
     const event = require('event');
 
-    function getChannelSections() {
-        return store.get(storeKeys.channelSections);
+    function getChannelSection(channelSections, channelParentId) {
+        return channelSections.filter(channelSection => channelSection.parent === channelParentId);
     }
 
-    function getChannelSection(channelParentId) {
-        return store.get(storeKeys.channelSections).filter(channelSection => channelSection.parent === channelParentId);
-    }
-
-    function saveChannelSection(sectionChannel) {
-        let channelSectionUpdated = false;
-        let channelSections = getChannelSections();
-        for (let i = 0; i < channelSections.length; i++) {
-            if (channelSections[i].parent === sectionChannel.parent) {
-                channelSections[i] = sectionChannel;
-                channelSectionUpdated = true;
+    function addOrReplaceChannelSection(channelSections, channelSection) {
+        if (channelSections === null || channelSections === undefined) channelSections = [];
+        let channelSectionReplaced = false;
+        for (let i = 0; i < channelSections.length && !channelSectionReplaced; i++) {
+            if (channelSections[i].parent === channelSection.parent) {
+                channelSections[i] = channelSection;
+                channelSectionReplaced = true;
             }
         }
-        if (!channelSectionUpdated) {
-            channelSections.push(sectionChannel);
+        if (!channelSectionReplaced) {
+            channelSections.push(channelSection);
         }
-        store.set(storeKeys.channelSections, channelSections);
+        return channelSections;
     }
 
-    /**
-     *
-     */
+    event.on('api:addOrReplaceChannelSection', ev => {
+        const channelSection = ChannelSection.fromJSON(ev.data().channelSection);
+        if (!channelSection.validateChannelSection()) return {error: 'ChannelSection is not valid'};
+        store.setInstance(storeKeys.channelSections, addOrReplaceChannelSection(store.getInstance(storeKeys.channelSections), channelSection));
+        return {channelSections: store.getInstance(storeKeys.channelSections)};
+    });
+
     event.on('api:createChannelSection', ev => {
         let channelSection = ChannelSection.fromJSON(ev.data().channelSection);
         engine.log('Channel Section: ' + channelSection.toJSONString());

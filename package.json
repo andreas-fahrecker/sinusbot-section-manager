@@ -1,0 +1,7 @@
+{
+  "name": "sinusbot-section-manager",
+  "version": "1.0.0",
+  "dependencies": {
+    "sinusbot-scripting-engine": "^1.0.11"
+  }
+}
