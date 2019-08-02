@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const sourceContent = fs.readFileSync('src/sinusbot-section-manager.js', 'utf-8');
-let transpiledContent = sourceContent;
+let transpiledContent = sourceContent.replace(/import\s\S+\s\S+\s('|")\S+('|");/g, '');
 const importScriptFunctions = sourceContent.match(/importScript\(('|")\S+('|")\);/g);
 for (let i = 0; i < importScriptFunctions.length; i++) {
     const scriptToImportPath = importScriptFunctions[i].match(/('|").+('|")/g)[0].replace(/('|")/g, '');

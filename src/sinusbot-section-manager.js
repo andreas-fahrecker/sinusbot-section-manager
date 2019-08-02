@@ -1,3 +1,5 @@
+import ChannelSection from "../sinusbot-section-manager/sisema/src/model/ChannelSection";
+
 registerPlugin({
     name: 'Sinusbot-Section-Manager',
     author: 'Andreas Fahrecker <andreasfahrecker@gmail.com>',
