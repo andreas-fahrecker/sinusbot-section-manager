@@ -1,4 +1,5 @@
 import ChannelSection from "../sinusbot-section-manager/sisema/src/model/ChannelSection";
+import ChannelPermission from "../sinusbot-section-manager/sisema/src/model/ChannelPermission";
 
 registerPlugin({
     name: 'Sinusbot-Section-Manager',
@@ -11,7 +12,6 @@ registerPlugin({
     requiredModules: ['http'],
     vars: []
 }, function (_, config, meta) {
-
     importScript('sinusbot-section-manager/sisema/src/model/ChannelSection.js');
     importScript('sinusbot-section-manager/sisema/src/model/ChannelPermission.js');
 

@@ -6,6 +6,8 @@
     "sinusbot-scripting-engine": "^1.0.11"
   },
   "scripts": {
-    "build": "node transpileSinusbotScript.js && yarn --cwd sinusbot-section-manager/sisema/ build"
+    "build": "node transpileSinusbotScript.js && yarn --cwd sinusbot-section-manager/sisema/ build",
+    "build-plugin": "node transpileSinusbotScript.js",
+    "build-web": "yarn --cwd sinusbot-section-manager/sisema/ build"
   }
 }
