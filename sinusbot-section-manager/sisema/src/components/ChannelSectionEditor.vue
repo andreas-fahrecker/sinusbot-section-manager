@@ -14,6 +14,9 @@
                                       :key="index" v-model="channelSection.permissions[index]"
                                       :readonly="viewMode"/>
         </b-form>
+        <b-row>
+            <b-col>{{channelSection}}</b-col>
+        </b-row>
         <b-row v-if="viewMode" slot="footer">
             <b-col>
                 <b-button block variant="primary" @click="editOnClick">Edit</b-button>
@@ -39,9 +42,11 @@
     import SectionVoidEncryptionInput from './section-inputs/SectionVoiceEncryptionInput';
     import SectionPermissionInput from './section-inputs/SectionPermissionInput';
     import ChannelSection from "../model/ChannelSection";
-    import ChannelPermission from "../model/ChannelPermission";
 
     export default {
+        props: {
+            channelSection: {type: ChannelSection}
+        },
         name: "ChannelSectionEditor",
         components: {
             SectionNameInput,
@@ -51,17 +56,6 @@
         },
         data() {
             return {
-                channelSection: new ChannelSection('Talking', 8, 4, 10, true,
-                    [
-                        new ChannelPermission('i_channel_needed_modify_power', '70'),
-                        new ChannelPermission('i_channel_needed_delete_power', '50'),
-                        new ChannelPermission('i_channel_needed_permission_modify_power', '70'),
-                        new ChannelPermission('i_ft_needed_file_upload_power', '70'),
-                        new ChannelPermission('i_ft_needed_file_download_power', '70'),
-                        new ChannelPermission('i_ft_needed_file_rename_power', '70'),
-                        new ChannelPermission('i_ft_needed_file_browse_power', '70'),
-                        new ChannelPermission('i_ft_needed_directory_create_power', '70')
-                    ]),
                 viewMode: true
             };
         },

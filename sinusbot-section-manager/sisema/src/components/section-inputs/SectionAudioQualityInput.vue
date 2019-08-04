@@ -3,7 +3,7 @@
         <b-col>
             <b-form-group label="Section Codec" label-for="sectionCodecInput">
                 <b-form-input v-if="readonly" id="sectionCodecInput"
-                              v-model="codecs.filter(value => value.value === codec)[0].text" type="text" readonly/>
+                              v-model="codecs.filter(option => option.value === codec)[0].text" type="text" readonly/>
                 <b-form-select v-else id="sectionCodecInput" :value="codec" @input="updateCodec($event)"
                                :options="codecs"/>
             </b-form-group>

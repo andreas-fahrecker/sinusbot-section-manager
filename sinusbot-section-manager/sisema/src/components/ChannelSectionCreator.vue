@@ -31,7 +31,7 @@
         </b-row>
         <b-row slot="footer">
             <b-col>
-                <b-button block @click="createChannelSection">Create Channel Section</b-button>
+                <b-button block @click="createChannelSection(selectedBotInstance)">Create Channel Section</b-button>
             </b-col>
         </b-row>
     </b-card>
@@ -46,6 +46,7 @@
     import SectionPermissionInput from "./section-inputs/SectionPermissionInput";
     import ChannelSection from "../model/ChannelSection";
     import ChannelPermission from "../model/ChannelPermission";
+    import ApiEndpointNames from "../ApiEndpointNames";
 
     export default {
         props: ['selectedBotInstance'],
@@ -69,13 +70,13 @@
             removeLastChannelPermission() {
                 this.channelSection.permissions.pop();
             },
-            createChannelSection() {
+            createChannelSection(selectedBotInstance) {
                 axios
-                    .post(process.env.VUE_APP_DOMAIN + 'api/v1/bot/i/' + this.selectedBotInstance + '/event/createChannelSection',
+                    .post(process.env.VUE_APP_DOMAIN + 'api/v1/bot/i/' + selectedBotInstance + '/event/' + ApiEndpointNames.addOrReplaceChannelSection(),
                         {channelSection: JSON.stringify(this.channelSection)},
                         {headers: {'Authorization': 'bearer ' + window.localStorage.token}}
                     )
-                    .then(response => console.log(JSON.stringify(response)));
+                    .then(response => console.log(response));
             }
         }
     }

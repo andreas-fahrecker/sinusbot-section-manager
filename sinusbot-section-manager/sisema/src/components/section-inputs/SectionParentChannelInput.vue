@@ -41,7 +41,6 @@
         watch: {
             selectedBotInstance(newSelectedBotInstance) {
                 this.fetchTsChannels(newSelectedBotInstance);
-                console.log('new selected bot instance: ' + newSelectedBotInstance);
             }
         },
         methods: {
