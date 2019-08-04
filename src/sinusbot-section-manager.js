@@ -13,10 +13,10 @@ registerPlugin({
     requiredModules: ['http'],
     vars: []
 }, function (_, config, meta) {
-    importScript('sinusbot-section-manager/sisema/src/model/ChannelSection.js');
-    importScript('sinusbot-section-manager/sisema/src/model/ChannelPermission.js');
+    importClass('sinusbot-section-manager/sisema/src/model/ChannelSection.js');
+    importClass('sinusbot-section-manager/sisema/src/model/ChannelPermission.js');
 
-    importScript('sinusbot-section-manager/sisema/src/ApiEndpointNames.js');
+    importObject('sinusbot-section-manager/sisema/src/ApiEndpointNames.js');
 
     function getChannelSectionsAsJSONString(channelSections) {
         return channelSections.map(channelSection => JSON.stringify(channelSection));
@@ -64,20 +64,20 @@ registerPlugin({
     }
     //--------------- Init Values ---------------
 
-    event.on('api:' + ApiEndpointNames.getChannelSections(), ev => {
-        engine.log(ApiEndpointNames.getChannelSections() + helperStrings.gotCalledMsg);
+    event.on('api:' + ApiEndpointNames.getChannelSections, ev => {
+        engine.log(ApiEndpointNames.getChannelSections + helperStrings.gotCalledMsg);
         return {channelSections: getChannelSectionsAsJSONString(store.getInstance(storeKeys.channelSections))};
     });
 
-    event.on('api:' + ApiEndpointNames.getChannelSection(), ev => {
+    event.on('api:' + ApiEndpointNames.getChannelSection, ev => {
         const channelSectionParentId = ev.data().channelSectionParentId;
-        engine.log(ApiEndpointNames.getChannelSection() + helperStrings.gotCalledMsg + ', requested channelSectionParentId: ' + channelSectionParentId);
+        engine.log(ApiEndpointNames.getChannelSection + helperStrings.gotCalledMsg + ', requested channelSectionParentId: ' + channelSectionParentId);
         return {channelSection: getChannelSection(store.getInstance(storeKeys.channelSections), channelSectionParentId)};
     });
 
-    event.on('api:' + ApiEndpointNames.addOrReplaceChannelSection(), ev => {
+    event.on('api:' + ApiEndpointNames.addOrReplaceChannelSection, ev => {
         const channelSection = ChannelSection.fromJSON(ev.data().channelSection);
-        engine.log(ApiEndpointNames.addOrReplaceChannelSection() + helperStrings.gotCalledMsg + ', channelSection: ' + channelSection.toJSONString());
+        engine.log(ApiEndpointNames.addOrReplaceChannelSection + helperStrings.gotCalledMsg + ', channelSection: ' + channelSection.toJSONString());
         if (!channelSection.validateChannelSection(backend.getChannels())) return {error: 'ChannelSection is not valid'};
         store.setInstance(storeKeys.channelSections, addOrReplaceChannelSection(store.getInstance(storeKeys.channelSections), channelSection));
         return {channelSections: store.getInstance(storeKeys.channelSections)};
