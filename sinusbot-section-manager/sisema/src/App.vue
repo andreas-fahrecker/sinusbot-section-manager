@@ -14,16 +14,12 @@
 </template>
 
 <script>
-    import {BContainer, BRow, BCol} from 'bootstrap-vue';
     import TitleComponent from './components/TitleComponent';
     import SectionPanel from './components/SectionPanel';
 
     export default {
         name: 'app',
         components: {
-            BContainer,
-            BRow,
-            BCol,
             TitleComponent,
             SectionPanel
         }

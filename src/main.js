@@ -1,3 +1,4 @@
+import {importClass, importObject} from "../transpiler/SinusbotScriptFunctions";
 import ChannelSection from "../sinusbot-section-manager/sisema/src/model/ChannelSection";
 import ChannelPermission from "../sinusbot-section-manager/sisema/src/model/ChannelPermission";
 import ApiEndpointNames from "../sinusbot-section-manager/sisema/src/ApiEndpointNames";
