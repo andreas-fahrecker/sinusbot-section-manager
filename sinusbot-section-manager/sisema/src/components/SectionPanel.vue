@@ -14,7 +14,8 @@
         </b-row>
         <b-row>
             <b-col>
-                <channel-section-creator :selectedBotInstance="activeInstanceUUID"/>
+                <channel-section-creator :selectedBotInstance="activeInstanceUUID"
+                                         @createdChannelSection="channelSections = $event"/>
             </b-col>
         </b-row>
     </b-card>
@@ -50,7 +51,7 @@
             fetchChannelSections(selectedBotInstance) {
                 if (selectedBotInstance !== null && selectedBotInstance !== undefined) {
                     axios
-                        .post(process.env.VUE_APP_DOMAIN + 'api/v1/bot/i/' + selectedBotInstance + '/event/' + ApiEndpointNames.getChannelSections(),
+                        .post(process.env.VUE_APP_DOMAIN + 'api/v1/bot/i/' + selectedBotInstance + '/event/' + ApiEndpointNames.getChannelSections,
                             {}, {headers: {'Authorization': 'bearer ' + window.localStorage.token}}
                         )
                         .then(response => {

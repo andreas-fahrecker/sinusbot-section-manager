@@ -30,6 +30,7 @@ export default class ChannelSection {
         return Boolean(this.name.trim());
     }
 
+
     _validateParent(possibleChannels) {
         return this.parent ? possibleChannels.filter(channel => {
             return channel.id() === this.parent.toString()

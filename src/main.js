@@ -2,6 +2,8 @@ import {importClass, importObject} from "../transpiler/SinusbotScriptFunctions";
 import ChannelSection from "../sinusbot-section-manager/sisema/src/model/ChannelSection";
 import ChannelPermission from "../sinusbot-section-manager/sisema/src/model/ChannelPermission";
 import ApiEndpointNames from "../sinusbot-section-manager/sisema/src/ApiEndpointNames";
+import ApiEndpointErrors from "../sinusbot-section-manager/sisema/src/ApiEndpointErrors";
+import ChannelSectionHelper from "./ChannelSectionHelper";
 
 registerPlugin({
     name: 'Sinusbot-Section-Manager',
@@ -18,6 +20,9 @@ registerPlugin({
     importClass('sinusbot-section-manager/sisema/src/model/ChannelPermission.js');
 
     importObject('sinusbot-section-manager/sisema/src/ApiEndpointNames.js');
+    importObject('sinusbot-section-manager/sisema/src/ApiEndpointErrors.js');
+
+    importClass('src/ChannelSectionHelper.js');
 
     function getChannelSectionsAsJSONString(channelSections) {
         return channelSections.map(channelSection => JSON.stringify(channelSection));
@@ -65,6 +70,28 @@ registerPlugin({
     }
     //--------------- Init Values ---------------
 
+    event.on('api:' + ApiEndpointNames.createChannelSection, ev => {
+        engine.log(ApiEndpointNames.createChannelSection + helperStrings.gotCalledMsg);
+        if (ev.data().channelSection === null || ev.data().channelSection === undefined) {
+            engine.log(ApiEndpointErrors.noChannelSectionProvided.msg);
+            return {error: ApiEndpointErrors.noChannelSectionProvided};
+        }
+        const channelSection = ChannelSection.fromJSON(ev.data().channelSection);
+        if (!channelSection.validateChannelSection(backend.getChannels())) {
+            engine.log(ApiEndpointErrors.channelSectionNotValid.msg);
+            return {error: ApiEndpointErrors.channelSectionNotValid};
+        }
+        const channelSections = ChannelSectionHelper.addChannelSection(store.getInstance(storeKeys.channelSections), channelSection);
+        // store.setInstance(storeKeys.channelSections, channelSections);
+        engine.log(channelSections);
+        const channelSectionsAsJSON = ChannelSectionHelper.convertChannelSectionsToJSONStrings(channelSections);
+        if (channelSectionsAsJSON === false) {
+            engine.log(ApiEndpointErrors.internalError.msg);
+            return {error: ApiEndpointErrors.internalError};
+        }
+        return {channelSections: channelSectionsAsJSON};
+    });
+
     event.on('api:' + ApiEndpointNames.getChannelSections, ev => {
         engine.log(ApiEndpointNames.getChannelSections + helperStrings.gotCalledMsg);
         return {channelSections: getChannelSectionsAsJSONString(store.getInstance(storeKeys.channelSections))};
@@ -79,20 +106,9 @@ registerPlugin({
     event.on('api:' + ApiEndpointNames.addOrReplaceChannelSection, ev => {
         const channelSection = ChannelSection.fromJSON(ev.data().channelSection);
         engine.log(ApiEndpointNames.addOrReplaceChannelSection + helperStrings.gotCalledMsg + ', channelSection: ' + channelSection.toJSONString());
-        if (!channelSection.validateChannelSection(backend.getChannels())) return {error: 'ChannelSection is not valid'};
-        store.setInstance(storeKeys.channelSections, addOrReplaceChannelSection(store.getInstance(storeKeys.channelSections), channelSection));
-        return {channelSections: store.getInstance(storeKeys.channelSections)};
-    });
-
-    event.on('api:createChannelSection', ev => {
-        let channelSection = ChannelSection.fromJSON(ev.data().channelSection);
-        engine.log('Channel Section: ' + channelSection.toJSONString());
-        engine.log('Validate Name: ' + channelSection._validateName());
-        engine.log('Validate Parent: ' + channelSection._validateParent(backend.getChannels()));
-        engine.log('Validate Codec: ' + channelSection._validateCodec());
-        engine.log('Validate Codec Quality: ' + channelSection._validateCodecQuality());
-        engine.log('Validate Encrypted: ' + channelSection._validateEncrypted());
-        engine.log('Validate Permissions: ' + channelSection._validatePermissions());
-        engine.log('Validate ChannelSection: ' + channelSection.validateChannelSection(backend.getChannels()));
+        if (!channelSection.validateChannelSection(backend.getChannels())) return {error: ApiEndpointErrors.channelSectionNotValid};
+        // store.setInstance(storeKeys.channelSections, addOrReplaceChannelSection(store.getInstance(storeKeys.channelSections), channelSection));
+        // return {channelSections: store.getInstance(storeKeys.channelSections)};
+        return {channelSections: addOrReplaceChannelSection(store.getInstance(storeKeys.channelSections), channelSection)};
     });
 });

@@ -46,6 +46,7 @@
     import SectionPermissionInput from "./section-inputs/SectionPermissionInput";
     import ChannelSection from "../model/ChannelSection";
     import ChannelPermission from "../model/ChannelPermission";
+    import Helper from "../Helper";
     import ApiEndpointNames from "../ApiEndpointNames";
 
     export default {
@@ -72,11 +73,22 @@
             },
             createChannelSection(selectedBotInstance) {
                 axios
-                    .post(process.env.VUE_APP_DOMAIN + 'api/v1/bot/i/' + selectedBotInstance + '/event/' + ApiEndpointNames.addOrReplaceChannelSection(),
+                    .post(process.env.VUE_APP_DOMAIN + 'api/v1/bot/i/' + selectedBotInstance + '/event/' + ApiEndpointNames.createChannelSection,
                         {channelSection: JSON.stringify(this.channelSection)},
                         {headers: {'Authorization': 'bearer ' + window.localStorage.token}}
                     )
-                    .then(response => console.log(response));
+                    .then(response => {
+                        if (response.data[0].error) {
+                            console.log('A error occurred during creating a new ChannelSection: ' + JSON.stringify(response.data[0].error));
+                            return;
+                        }
+                        const channelSections = Helper.convertJSONStringsToChannelSections(response.data[0].channelSections);
+                        if (channelSections === false) {
+                            console.log('Some unexpected error occurred.');
+                            return;
+                        }
+                        this.$emit('createdChannelSection', channelSections);
+                    });
             }
         }
     }

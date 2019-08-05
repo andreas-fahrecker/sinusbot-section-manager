@@ -27,10 +27,6 @@ export default class ChannelPermission {
         return this._validateId() && this._validateValue();
     }
 
-    toJSONString() {
-        return JSON.stringify(this);
-    }
-
     static fromJSON(serializedJSON) {
         return Object.assign(new ChannelPermission(), JSON.parse(serializedJSON));
     }
