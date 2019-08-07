@@ -9,7 +9,11 @@ export default class ChannelPermission {
     }
 
     set value(value) {
-        this._value = parseInt(value);
+        if (value !== null && typeof value === 'string' || value instanceof String) {
+            this._value = parseInt(value, 10);
+        } else {
+            this._value = value;
+        }
     }
 
     _validateId() {
