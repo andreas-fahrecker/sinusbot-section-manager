@@ -1,0 +1,31 @@
+version: '3.1'
+
+services:
+  ts3-server:
+    image: teamspeak:latest
+    container_name: 'ssm-dev-ts3-server'
+    restart: unless-stopped
+    ports:
+      - 9987:9987/udp
+      - 30033:30033/tcp
+    environment:
+      TS3SERVER_LICENSE: accept
+    volumes:
+      - ./volumes/ts3-server:/var/ts3server
+    networks:
+      ssm-dev:
+        aliases:
+          - ts3-server
+  sinusbot:
+    image: sinusbot/docker
+    container_name: 'ssm-dev-sinusbot'
+    restart: unless-stopped
+    ports:
+      - 8087:8087/tcp
+    volumes:
+      - ./volumes/sinusbot/scripts:/opt/sinusbot/scripts
+      - ./volumes/sinusbot/data:/opt/sinusbot/data
+    networks:
+      ssm-dev:
+networks:
+  ssm-dev:
