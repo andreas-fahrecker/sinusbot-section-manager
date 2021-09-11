@@ -30,59 +30,59 @@ registerPlugin({
                     name: "SECTION_TYPE",
                     title: "Section Type",
                     type: "select",
-                    options: ["Normal"],
+                    options: ["Numbered"],
                     default: 0
                 },
                 {
-                    name: "CHANNEL_PREFIX_ENABLED",
-                    title: "Channel Prefix Enabled",
+                    name: "NUMBERED_PREFIX_ENABLED",
+                    title: "Number Prefix Enabled",
                     type: "checkbox",
                     conditions: [
                         { field: "SECTION_TYPE", value: 0 }
                     ]
                 },
                 {
-                    name: "CHANNEL_PREFIX",
-                    title: "Channel Prefix",
+                    name: "NUMBERED_PREFIX",
+                    title: "Number Prefix",
                     type: "string",
                     conditions: [
                         { field: "SECTION_TYPE", value: 0 },
-                        { field: "CHANNEL_PREFIX_ENABLED", value: true }
+                        { field: "NUMBERED_PREFIX_ENABLED", value: true }
                     ]
                 },
                 {
-                    name: "CHANNEL_PREFIX_SPACER",
+                    name: "NUMBERED_PREFIX_SPACER",
                     title: "Space between prefix and channel number?",
                     type: "checkbox",
                     conditions: [
                         { field: "SECTION_TYPE", value: 0 },
-                        { field: "CHANNEL_PREFIX_ENABLED", value: true }
+                        { field: "NUMBERED_PREFIX_ENABLED", value: true }
                     ]
                 },
                 {
-                    name: "CHANNEL_SUFFIX_ENABLED",
-                    title: "Channel Suffix Enabled",
+                    name: "NUMBERED_SUFFIX_ENABLED",
+                    title: "Number Suffix Enabled",
                     type: "checkbox",
                     conditions: [
                         { field: "SECTION_TYPE", value: 0 }
                     ]
                 },
                 {
-                    name: "CHANNEL_SUFFIX",
-                    title: "Channel Suffix",
+                    name: "NUMBERED_SUFFIX",
+                    title: "Number Suffix",
                     type: "string",
                     conditions: [
                         { field: "SECTION_TYPE", value: 0 },
-                        { field: "CHANNEL_SUFFIX_ENABLED", value: true }
+                        { field: "NUMBERED_SUFFIX_ENABLED", value: true }
                     ]
                 },
                 {
-                    name: "CHANNEL_SUFFIX_SPACER",
+                    name: "NUMBERED_SUFFIX_SPACER",
                     title: "Space between suffix and channel number?",
                     type: "checkbox",
                     conditions: [
                         { field: "SECTION_TYPE", value: 0 },
-                        { field: "CHANNEL_SUFFIX_ENABLED", value: true }
+                        { field: "NUMBERED_SUFFIX_ENABLED", value: true }
                     ]
                 },
                 {
@@ -168,7 +168,7 @@ registerPlugin({
     }
 
     const SECTION_TYPES = {
-        NORMAL: 0
+        NUMBERED: 0
     };
     const CODECS = {
         Speex_Schmalband: 0,
@@ -189,7 +189,6 @@ registerPlugin({
             id,
             value
         ) {
-            if (!(typeof id === "string" && typeof value === "number")) throw new Error("Coudn't create ChannelPermissions!");
             this.id = id;
             this.value = value;
         }
@@ -202,10 +201,6 @@ registerPlugin({
          * @param {number} type 
          * @param {number|false} min_channels 
          * @param {number|false} max_channels 
-         * @param {string|false} channel_prefix 
-         * @param {boolean} channel_prefix_spacer 
-         * @param {string|false} channel_suffix 
-         * @param {boolean} channel_suffix_spacer 
          * @param {number} channel_codec 
          * @param {number} channel_codec_quality 
          * @param {[ChannelPermission]|false} channel_permissions 
@@ -216,29 +211,9 @@ registerPlugin({
             type,
             min_channels,
             max_channels,
-            channel_prefix,
-            channel_prefix_spacer,
-            channel_suffix,
-            channel_suffix_spacer,
             channel_codec,
             channel_codec_quality,
             channel_permissions) {
-            if (
-                !(
-                    typeof name === "string" &&
-                    typeof parent_channel_id === "string" &&
-                    typeof type === "number" &&
-                    (typeof min_channels === "number" || min_channels === false) &&
-                    (typeof max_channels === "number" || max_channels === false) &&
-                    (typeof channel_prefix === "string" || channel_prefix === false) &&
-                    typeof channel_prefix_spacer === "boolean" &&
-                    (typeof channel_suffix === "string" || channel_suffix === false) &&
-                    typeof channel_suffix_spacer === "boolean" &&
-                    typeof channel_codec === "number" &&
-                    typeof channel_codec_quality === "number" &&
-                    (Array.isArray(channel_permissions) || channel_permissions === false)
-                )
-            ) throw new Error("Couldn't create ChannelSection!");
             if (name === "") throw new Error("Name of Channel Section cannot be an empty string.");
             if (!backend.getChannelByID(parent_channel_id)) throw new Error("Channel Section Parent doesn't exist.");
             if (!Object.values(SECTION_TYPES).includes(type)) throw new Error("Channel Section Type doesn't exists");
@@ -255,15 +230,45 @@ registerPlugin({
             this.type = type;
             this.min_channels = min_channels;
             this.max_channels = max_channels;
-            this.channel_prefix = channel_prefix;
-            this.channel_prefix_spacer = channel_prefix_spacer;
-            this.channel_suffix = channel_suffix;
-            this.channel_suffix_spacer = channel_suffix_spacer;
             this.channel_codec = channel_codec;
             this.channel_codec_quality = channel_codec_quality;
             this.channel_permissions = channel_permissions;
 
             this.channels = [];
+        }
+    }
+    class NumberedChannelSection extends ChannelSection {
+        /**
+         * 
+         * @param {string} name 
+         * @param {string} parent_channel_id 
+         * @param {number|false} min_channels 
+         * @param {number|false} max_channels 
+         * @param {string|false} channel_prefix 
+         * @param {boolean} channel_prefix_spacer 
+         * @param {string|false} channel_suffix 
+         * @param {boolean} channel_suffix_spacer 
+         * @param {number} channel_codec 
+         * @param {number} channel_codec_quality 
+         * @param {[ChannelPermission]|false} channel_permissions 
+         */
+        constructor(
+            name,
+            parent_channel_id,
+            min_channels,
+            max_channels,
+            channel_prefix,
+            channel_prefix_spacer,
+            channel_suffix,
+            channel_suffix_spacer,
+            channel_codec,
+            channel_codec_quality,
+            channel_permissions) {
+                super(name, parent_channel_id, SECTION_TYPES.NUMBERED, min_channels, max_channels, channel_codec, channel_codec_quality, channel_permissions);
+                this.channel_prefix = channel_prefix;
+                this.channel_prefix_spacer = channel_prefix_spacer;
+                this.channel_suffix = channel_suffix;
+                this.channel_suffix_spacer = channel_suffix_spacer;
         }
     }
 
@@ -286,6 +291,14 @@ registerPlugin({
             MANAGED_SECTION.SECTION_MIN_CHANNELS : false;
         const max_channels = MANAGED_SECTION.SECTION_MAX_CHANNEL_ENABLED ?
             MANAGED_SECTION.SECTION_MAX_CHANNELS : false;
+        const channel_codec = parseInt(MANAGED_SECTION.CHANNEL_CODEC, 10);
+        const channel_codec_quality = parseInt(MANAGED_SECTION.CHANNEL_CODEC_QUALITY, 10) + 1;
+        const channel_permissions = MANAGED_SECTION.CHANNEL_PERMISSIONS ?
+            MANAGED_SECTION.CHANNEL_PERMISSIONS.map(
+                channel_permission => new ChannelPermission(channel_permission.PERMISSION_ID, channel_permission.PERMISSION_VALUE)
+            ) :
+            false;
+        if (type !== SECTION_TYPES.NUMBERED) throw new Error("Unsupportet Section Type");
         const channel_prefix = MANAGED_SECTION.CHANNEL_PREFIX_ENABLED ?
             MANAGED_SECTION.CHANNEL_PREFIX : false;
         const channel_prefix_spacer = channel_prefix ?
@@ -294,17 +307,9 @@ registerPlugin({
             MANAGED_SECTION.CHANNEL_SUFFIX : false;
         const channel_suffix_spacer = channel_suffix ?
             MANAGED_SECTION.CHANNEL_SUFFIX_ENABLED : false;
-        const channel_codec = parseInt(MANAGED_SECTION.CHANNEL_CODEC, 10);
-        const channel_codec_quality = parseInt(MANAGED_SECTION.CHANNEL_CODEC_QUALITY, 10) + 1;
-        const channel_permissions = MANAGED_SECTION.CHANNEL_PERMISSIONS ?
-            MANAGED_SECTION.CHANNEL_PERMISSIONS.map(
-                channel_permission => new ChannelPermission(channel_permission.PERMISSION_ID, channel_permission.PERMISSION_VALUE)
-            ) :
-            false;
-        return new ChannelSection(
+        return new NumberedChannelSection(
             MANAGED_SECTION.SECTION_NAME,
             MANAGED_SECTION.SECTION_PARENT_CHANNEL,
-            type,
             min_channels,
             max_channels,
             channel_prefix,
