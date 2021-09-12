@@ -2,6 +2,8 @@
 compose-dev/volumes/sinusbot/data/*
 compose-dev/volumes/sinusbot/scripts/*
 compose-dev/volumes/ts3-server/*
+package-lock.json
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,yarn,webstorm,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,yarn,webstorm,macos

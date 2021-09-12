@@ -193,7 +193,52 @@ registerPlugin({
             this.value = value;
         }
     }
-    class ChannelSection {
+    class ChannelSectionSettings {
+        /**
+        * Returns one ChannelSection passed in from the Object in the Configs Array
+        * @param {*} managed_section 
+        * @returns {ChannelSectionSettings}
+        */
+        static loadChannelSectionSettings(managed_section) {
+            const type = parseInt(managed_section.SECTION_TYPE, 10);
+            const min_channels = managed_section.SECTION_MIN_CHANNEL_ENABLED ?
+                managed_section.SECTION_MIN_CHANNELS : false;
+            const max_channels = managed_section.SECTION_MAX_CHANNEL_ENABLED ?
+                managed_section.SECTION_MAX_CHANNELS : false;
+            const channel_codec = parseInt(managed_section.CHANNEL_CODEC, 10);
+            const channel_codec_quality = parseInt(managed_section.CHANNEL_CODEC_QUALITY, 10) + 1;
+            const channel_permissions = managed_section.CHANNEL_PERMISSIONS ?
+                managed_section.CHANNEL_PERMISSIONS.map(
+                    channel_permission => new ChannelPermission(channel_permission.PERMISSION_ID, channel_permission.PERMISSION_VALUE)
+                ) :
+                false;
+            if (type === SECTION_TYPES.NUMBERED) {
+                const channel_prefix = MANAGED_SECTION.CHANNEL_PREFIX_ENABLED ?
+                    MANAGED_SECTION.CHANNEL_PREFIX : false;
+                const channel_prefix_spacer = channel_prefix ?
+                    MANAGED_SECTION.CHANNEL_PREFIX_ENABLED : false;
+                const channel_suffix = MANAGED_SECTION.CHANNEL_SUFFIX_ENABLED ?
+                    MANAGED_SECTION.CHANNEL_SUFFIX : false;
+                const channel_suffix_spacer = channel_suffix ?
+                    MANAGED_SECTION.CHANNEL_SUFFIX_ENABLED : false;
+                return new NumberedChannelSectionSettings(
+                    MANAGED_SECTION.SECTION_NAME,
+                    MANAGED_SECTION.SECTION_PARENT_CHANNEL,
+                    min_channels,
+                    max_channels,
+                    channel_prefix,
+                    channel_prefix_spacer,
+                    channel_suffix,
+                    channel_suffix_spacer,
+                    channel_codec,
+                    channel_codec_quality,
+                    channel_permissions
+                );
+            } else {
+                throw new Error("Unsupportet Section Type");
+            }
+        }
+
         /**
          * 
          * @param {string} name 
@@ -237,7 +282,7 @@ registerPlugin({
             this.channels = [];
         }
     }
-    class NumberedChannelSection extends ChannelSection {
+    class NumberedChannelSectionSettings extends ChannelSectionSettings {
         /**
          * 
          * @param {string} name 
@@ -264,18 +309,207 @@ registerPlugin({
             channel_codec,
             channel_codec_quality,
             channel_permissions) {
-                super(name, parent_channel_id, SECTION_TYPES.NUMBERED, min_channels, max_channels, channel_codec, channel_codec_quality, channel_permissions);
-                this.channel_prefix = channel_prefix;
-                this.channel_prefix_spacer = channel_prefix_spacer;
-                this.channel_suffix = channel_suffix;
-                this.channel_suffix_spacer = channel_suffix_spacer;
+            super(name, parent_channel_id, SECTION_TYPES.NUMBERED, min_channels, max_channels, channel_codec, channel_codec_quality, channel_permissions);
+            this.channel_prefix = channel_prefix;
+            this.channel_prefix_spacer = channel_prefix_spacer;
+            this.channel_suffix = channel_suffix;
+            this.channel_suffix_spacer = channel_suffix_spacer;
+        }
+    }
+
+    class ChannelSection {
+        /**
+         * 
+         * @param {ChannelSectionSettings} channelSettings 
+         */
+        constructor(channelSettings) {
+            this.channelSettings = channelSettings;
+            this.managedChannels = new Map();
+        }
+
+        initiateSection() {
+            throw new Error("Abstract Method Called.");
+        }
+
+        handleNewEmptyChannel(channelId) {
+            throw new Error("Abstract Method Called.");
+        }
+    }
+
+    class NumberedChannelSection extends ChannelSection {
+        /**
+         * 
+         * @param {NumberedChannelSectionSettings} channelSettings 
+         */
+        constructor(channelSettings) {
+            super(channelSettings);
+            this._nextChannelIndex = 1;
+            this._channelPrefix = (channelSettings.channel_prefix ? channelSettings.channel_prefix : "") + (channelSettings.channel_prefix ? " " : "");
+            this._channelSuffix = (channelSettings.channel_suffix_spacer ? " " : "") + (channelSettings.channel_suffix ? channelSettings.channel_suffix : "");
+        }
+
+        initiateSection() {
+            //#region Empty Parent Channel
+            {
+                const channelsToDelete = backend.getChannels().filter(channel => {
+                    if (!channel.parent()) return false;
+                    return channel.parent().id() === parent_channel_id;
+                });
+                channelsToDelete.forEach(channel => channel.delete());
+            }
+            //#endregion
+            //#region Create Channels
+            {
+                let loop;
+                do {
+                    loop = createChannel() ? false : true;
+                } while (loop);
+            }
+            //#endregion 
+        }
+
+        handleNewEmptyChannel(channelId) {
+            const channelIndex = this.getIntexOfId(channelId);
+            this.deleteChannel(channelId, true);
+            //TODO
+
+        }
+
+        createChannel() {
+            if (!this._nextChannelIndex + 1 < this.channelSettings.max_channels) return false;
+            const channelId = this.createChannel(this._nextChannelIndex);
+            this._nextChannelIndex++;
+            return channelId;
+        }
+
+        createChannel(index) {
+            if (index < 1) return false
+            if (index > this.channelSettings.max_channels) return false;
+            const channelParams = {
+                name: this._channelPrefix + index + this._channelSuffix,
+                parent: this.channelSettings.parent_channel_id,
+                description: "",
+                topic: "",
+                password: "",
+                codec: this.channelSettings.channel_codec,
+                codecQuality: this.channelSettings.channel_codec_quality,
+                encrypted: true,
+                permanent: true,
+                semipermanent: false,
+                maxClients: -1
+            }
+            if (backend.getChannels.filter(channel => channel.name() === channelParams.name).length > 0) {
+                channelParams.name = channelParams.name + "_Error";
+            }
+            const channel = backend.createChannel(channelParams);
+            this.managedChannels.set(channel.id(), channel);
+            if (this.channelSettings.channel_permissions) {
+                this.channelSettings.channel_permissions.forEach(channel_permission => {
+                    const permission = channel.addPermission(channel_permission.id);
+                    permission.setValue(channel_permission.value);
+                    permission.save();
+                });
+            }
+            return channel.id();
+        }
+
+        deleteChannel(channelId, skipIndexDecreasing = false) {
+            if (!skipIndexDecreasing) {
+                this._nextChannelIndex--;
+            }
+            if (!this.managedChannels.has(this.managedChannels)) return false;
+            this.managedChannels.get(channelId).delete();
+            return this.managedChannels.delete(channelId);
+        }
+
+        getIntexOfId(channelId) {
+            return parseInt(this.managedChannels.get(channelId).name().replaceAll(this._channelPrefix, "").replaceAll(this._channelSuffix, ""), 10);
+        }
+    }
+
+    class ChannelSectionManager {
+        /**
+        * Returns an Array of all ChannelSection passed in from the Config
+        * @param {*} MANAGED_SECTIONS
+        * @returns {[ChannelSection]}
+        */
+        static loadChannelSections(managed_sections) {
+            return managed_sections.map(section => {
+                const channelSettings = ChannelSectionSettings.loadChannelSectionSettings(section);
+                if (channelSettings.type = SECTION_TYPES.NUMBERED) {
+                    return new NumberedChannelSection(channelSettings);
+                } else {
+                    throw new Error("Unsupportet Section Type");
+                }
+            });
+        }
+        constructor(managed_sections) {
+            const allChannelSections = ChannelSectionManager.loadChannelSections(managed_sections)
+            this.channelSections = new Map();
+            allChannelSections.forEach(channelSection => {
+                this.channelSections.set(channelSection.channelSettings.name, channelSection);
+            });
+        }
+
+        run() {
+            this.channelSections.forEach(channelSection => channelSection.initiateSection());
+
+            event.on("clientMove", e => {
+                if (e.fromChannel) {
+                    if (e.fromChannel.parent()) {
+                        if (e.fromChannel.getClientCount() < 1) {
+                            const sectionName = this.getSectionNameFromParent(e.fromChannel.parent().id());
+                            if (sectionName) {
+                                this.handleNewEmptyChannel(sectionName, e.fromChannel.id());
+                            }
+                        }
+                    }
+                }
+                //TODO
+            });
+
+            event.on("channelDelete", e => {
+                if (e.invoker.id() === backend.getBotClientID()) return;
+                const sectionName = this.getSectionNameFromParent(e.channel.id());
+                if (sectionName) {
+                    this.channelSections.get(sectionName).deleteChannel(e.channel.id());
+                }
+            });
+
+            event.on("channelCreate", e => {
+                if (e.invoker.id() === backend.getBotClientID()) return;
+                const sectionName = this.getSectionNameFromParent(e.channel.id());
+                if (sectionName) {
+                    e.channel.delete();
+                }
+            });
+        }
+
+        /**
+         * Returns the section name for a ChannelParentId, return false if channel is not managed.
+         * @param {string} channelParentId 
+         * @returns {string|false}
+         */
+        getSectionNameFromParent(channelParentId) {
+            const channelSectionsIter = this.channelSections.values();
+            let channelSection = channelSectionsIter.next().value;
+            while (channelSection) {
+                if (channelSection.channelSettings.parent_channel_id === channelParentId) {
+                    return channelSection.channelSection.channelSettings.name;
+                }
+            }
+            return false;
+        }
+
+        handleNewEmptyChannel(sectionName, channelId) {
+            this.channelSections.get(sectionName).handleNewEmptyChannel(channelId);
         }
     }
 
     /**
     * Returns an Array of all ChannelSection passed in from the Config
     * @param {*} MANAGED_SECTIONS
-    * @returns {[ChannelSection]}
+    * @returns {[ChannelSectionSettings]}
     */
     function loadChannelSections(MANAGED_SECTIONS) {
         return MANAGED_SECTIONS.map(section => loadChannelSection(section));
@@ -283,7 +517,7 @@ registerPlugin({
     /**
      * Returns one ChannelSection passed in from the Object in the Configs Array
      * @param {*} MANAGED_SECTION 
-     * @returns {ChannelSection}
+     * @returns {ChannelSectionSettings}
      */
     function loadChannelSection(MANAGED_SECTION) {
         const type = parseInt(MANAGED_SECTION.SECTION_TYPE, 10);
@@ -307,7 +541,7 @@ registerPlugin({
             MANAGED_SECTION.CHANNEL_SUFFIX : false;
         const channel_suffix_spacer = channel_suffix ?
             MANAGED_SECTION.CHANNEL_SUFFIX_ENABLED : false;
-        return new NumberedChannelSection(
+        return new NumberedChannelSectionSettings(
             MANAGED_SECTION.SECTION_NAME,
             MANAGED_SECTION.SECTION_PARENT_CHANNEL,
             min_channels,
