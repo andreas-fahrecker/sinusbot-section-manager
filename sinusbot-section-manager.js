@@ -357,10 +357,9 @@ registerPlugin({
                     if (!channel.parent()) return false;
                     return channel.parent().id() === this.channelSettings.parent_channel_id;
                 });
-                channelsToDelete.forEach(channel => channel.delete());
+                channelsToDelete.forEach(channel => {channel.delete(); sleep(10);});
             }
             //#endregion
-            sleep(100);
             //#region Create Channels
             {
                 while (this.managedChannels.size < this.channelSettings.min_channels) {
@@ -432,6 +431,7 @@ registerPlugin({
                 channelParams.name = channelParams.name + "_Error";
             }
             const channel = backend.createChannel(channelParams);
+            sleep(10);
             this.managedChannels.set(channel.id(), channel);
             if (this.channelSettings.channel_permissions) {
                 this.channelSettings.channel_permissions.forEach(channel_permission => {
@@ -446,6 +446,7 @@ registerPlugin({
         deleteChannel(channelId) {
             if (!this.managedChannels.has(channelId)) return false;
             this.managedChannels.get(channelId).delete();
+            sleep(10);
             return this.managedChannels.delete(channelId);
         }
 
