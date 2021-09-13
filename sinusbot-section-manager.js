@@ -167,6 +167,14 @@ registerPlugin({
             engine.log("SSM: " + Object.keys(LOG_LEVEL).filter(log_level => LOG_LEVEL[log_level] === level)[0] + ": " + message);
     }
 
+    function sleep(milliseconds) {
+        const date = Date.now();
+        let currentDate = null;
+        do {
+            currentDate = Date.now();
+        } while (currentDate - date < milliseconds);
+    }
+
     const SECTION_TYPES = {
         NUMBERED: 0
     };
@@ -197,7 +205,7 @@ registerPlugin({
         /**
         * Returns one ChannelSection passed in from the Object in the Configs Array
         * @param {*} managed_section 
-        * @returns {ChannelSectionSettings}
+        * @returns {NumberedChannelSectionSettings}
         */
         static loadChannelSectionSettings(managed_section) {
             const type = parseInt(managed_section.SECTION_TYPE, 10);
@@ -213,23 +221,23 @@ registerPlugin({
                 ) :
                 false;
             if (type === SECTION_TYPES.NUMBERED) {
-                const channel_prefix = MANAGED_SECTION.CHANNEL_PREFIX_ENABLED ?
-                    MANAGED_SECTION.CHANNEL_PREFIX : false;
-                const channel_prefix_spacer = channel_prefix ?
-                    MANAGED_SECTION.CHANNEL_PREFIX_ENABLED : false;
-                const channel_suffix = MANAGED_SECTION.CHANNEL_SUFFIX_ENABLED ?
-                    MANAGED_SECTION.CHANNEL_SUFFIX : false;
-                const channel_suffix_spacer = channel_suffix ?
-                    MANAGED_SECTION.CHANNEL_SUFFIX_ENABLED : false;
+                const channelPrefixWoSpacer = (managed_section.NUMBERED_PREFIX_ENABLED ?
+                    managed_section.NUMBERED_PREFIX : false);
+                const channelPrefixSpacer = channelPrefixWoSpacer ?
+                    managed_section.NUMBERED_PREFIX_SPACER : false;
+                const channelSuffixWoSpacer = managed_section.NUMBERED_SUFFIX_ENABLED ?
+                    managed_section.NUMBERED_SUFFIX : false;
+                const channelSuffixSpacer = channelSuffixWoSpacer ?
+                    managed_section.NUMBERED_SUFFIX_SPACER : false;
+                const channelPrefix = (channelPrefixWoSpacer ? channelPrefixWoSpacer : "") + (channelPrefixSpacer ? " " : "");
+                const channelSuffix = (channelSuffixSpacer ? " " : "") + (channelSuffixWoSpacer ? channelSuffixWoSpacer : "");
                 return new NumberedChannelSectionSettings(
-                    MANAGED_SECTION.SECTION_NAME,
-                    MANAGED_SECTION.SECTION_PARENT_CHANNEL,
+                    managed_section.SECTION_NAME,
+                    managed_section.SECTION_PARENT_CHANNEL,
                     min_channels,
                     max_channels,
-                    channel_prefix,
-                    channel_prefix_spacer,
-                    channel_suffix,
-                    channel_suffix_spacer,
+                    channelPrefix,
+                    channelSuffix,
                     channel_codec,
                     channel_codec_quality,
                     channel_permissions
@@ -289,10 +297,8 @@ registerPlugin({
          * @param {string} parent_channel_id 
          * @param {number|false} min_channels 
          * @param {number|false} max_channels 
-         * @param {string|false} channel_prefix 
-         * @param {boolean} channel_prefix_spacer 
-         * @param {string|false} channel_suffix 
-         * @param {boolean} channel_suffix_spacer 
+         * @param {string|false} channelPrefix 
+         * @param {string|false} channelSuffix 
          * @param {number} channel_codec 
          * @param {number} channel_codec_quality 
          * @param {[ChannelPermission]|false} channel_permissions 
@@ -302,18 +308,14 @@ registerPlugin({
             parent_channel_id,
             min_channels,
             max_channels,
-            channel_prefix,
-            channel_prefix_spacer,
-            channel_suffix,
-            channel_suffix_spacer,
+            channelPrefix,
+            channelSuffix,
             channel_codec,
             channel_codec_quality,
             channel_permissions) {
             super(name, parent_channel_id, SECTION_TYPES.NUMBERED, min_channels, max_channels, channel_codec, channel_codec_quality, channel_permissions);
-            this.channel_prefix = channel_prefix;
-            this.channel_prefix_spacer = channel_prefix_spacer;
-            this.channel_suffix = channel_suffix;
-            this.channel_suffix_spacer = channel_suffix_spacer;
+            this.channelPrefix = channelPrefix;
+            this.channelSuffix = channelSuffix;
         }
     }
 
@@ -343,9 +345,9 @@ registerPlugin({
          */
         constructor(channelSettings) {
             super(channelSettings);
-            this._nextChannelIndex = 1;
-            this._channelPrefix = (channelSettings.channel_prefix ? channelSettings.channel_prefix : "") + (channelSettings.channel_prefix ? " " : "");
-            this._channelSuffix = (channelSettings.channel_suffix_spacer ? " " : "") + (channelSettings.channel_suffix ? channelSettings.channel_suffix : "");
+            this._emptyChannels = 0;
+            this._channelPrefix = channelSettings.channelPrefix;
+            this._channelSuffix = channelSettings.channelSuffix;
         }
 
         initiateSection() {
@@ -353,40 +355,65 @@ registerPlugin({
             {
                 const channelsToDelete = backend.getChannels().filter(channel => {
                     if (!channel.parent()) return false;
-                    return channel.parent().id() === parent_channel_id;
+                    return channel.parent().id() === this.channelSettings.parent_channel_id;
                 });
                 channelsToDelete.forEach(channel => channel.delete());
             }
             //#endregion
+            sleep(100);
             //#region Create Channels
             {
-                let loop;
-                do {
-                    loop = createChannel() ? false : true;
-                } while (loop);
+                while (this.managedChannels.size < this.channelSettings.min_channels) {
+                    this.createChannel();
+                }
             }
             //#endregion 
         }
 
         handleNewEmptyChannel(channelId) {
-            const channelIndex = this.getIntexOfId(channelId);
-            this.deleteChannel(channelId, true);
-            //TODO
+            if (this.managedChannels.size - 1 < this.channelSettings.min_channels) {
+                this._emptyChannels++;
+                log(LOG_LEVEL.VERBOSE, "Increased Empty Channels of Section: " + this.channelSettings.name + " to " + this._emptyChannels);
+            } else {
+                const delChannelIndex = this.getIntexOfId(channelId);
+                const delChannelPos = this.getPosOfId(channelId);
+                this.deleteChannel(channelId);
+                sleep(100);
+                const moveArray = Array.from(this.managedChannels.values()).sort((c1, c2) => this.getIndexOfName(c1.name()) - this.getIndexOfName(c2.name()));
+                console.log("channel pos: " + delChannelPos);
+                moveArray[moveArray.length - 1].setPosition(delChannelPos);
+                moveArray[moveArray.length - 1].setName(this.genNameOfIndex(delChannelIndex));
+            }
+        }
 
+        handleNewFilledChannel() {
+            this._emptyChannels--;
+            if (this.managedChannels.size + 1 > this.channelSettings.max_channels) return;
+            if (this._emptyChannels > 0) return;
+            this.createChannel();
+        }
+
+        handleManualDeletedChannel(channelId) {
+            const channelIndex = this.getIntexOfId(channelId);
+            const channelPos = this.managedChannels.get(channelId).position();
+            this.managedChannels.delete(channelId);
+            this.createChannelWithIndex(channelIndex, channelPos);
         }
 
         createChannel() {
-            if (!this._nextChannelIndex + 1 < this.channelSettings.max_channels) return false;
-            const channelId = this.createChannel(this._nextChannelIndex);
-            this._nextChannelIndex++;
+            const createIndex = this.managedChannels.size + 1;
+            console.log("createIndex: " + createIndex);
+            if (createIndex + 1 > this.channelSettings.max_channels) return false;
+            const channelId = this.createChannelWithIndex(createIndex);
+            if (channelId) this._emptyChannels++;
             return channelId;
         }
 
-        createChannel(index) {
+        createChannelWithIndex(index, position = false) {
             if (index < 1) return false
             if (index > this.channelSettings.max_channels) return false;
             const channelParams = {
-                name: this._channelPrefix + index + this._channelSuffix,
+                name: this.genNameOfIndex(index),
                 parent: this.channelSettings.parent_channel_id,
                 description: "",
                 topic: "",
@@ -398,7 +425,10 @@ registerPlugin({
                 semipermanent: false,
                 maxClients: -1
             }
-            if (backend.getChannels.filter(channel => channel.name() === channelParams.name).length > 0) {
+            if (position) {
+                channelParams.position = position;
+            }
+            if (backend.getChannels().filter(channel => channel.name() === channelParams.name).length > 0) {
                 channelParams.name = channelParams.name + "_Error";
             }
             const channel = backend.createChannel(channelParams);
@@ -413,17 +443,26 @@ registerPlugin({
             return channel.id();
         }
 
-        deleteChannel(channelId, skipIndexDecreasing = false) {
-            if (!skipIndexDecreasing) {
-                this._nextChannelIndex--;
-            }
-            if (!this.managedChannels.has(this.managedChannels)) return false;
+        deleteChannel(channelId) {
+            if (!this.managedChannels.has(channelId)) return false;
             this.managedChannels.get(channelId).delete();
             return this.managedChannels.delete(channelId);
         }
 
+        genNameOfIndex(index) {
+            return this._channelPrefix + index + this._channelSuffix;
+        }
+
+        getIndexOfName(name) {
+            return parseInt(name.replace(this._channelPrefix, "").replace(this._channelSuffix, ""), 10);
+        }
+
         getIntexOfId(channelId) {
-            return parseInt(this.managedChannels.get(channelId).name().replaceAll(this._channelPrefix, "").replaceAll(this._channelSuffix, ""), 10);
+            return this.getIndexOfName(this.managedChannels.get(channelId).name());
+        }
+
+        getPosOfId(channelId) {
+            return this.managedChannels.get(channelId).position();
         }
     }
 
@@ -436,7 +475,7 @@ registerPlugin({
         static loadChannelSections(managed_sections) {
             return managed_sections.map(section => {
                 const channelSettings = ChannelSectionSettings.loadChannelSectionSettings(section);
-                if (channelSettings.type = SECTION_TYPES.NUMBERED) {
+                if (channelSettings instanceof NumberedChannelSectionSettings) {
                     return new NumberedChannelSection(channelSettings);
                 } else {
                     throw new Error("Unsupportet Section Type");
@@ -465,24 +504,37 @@ registerPlugin({
                         }
                     }
                 }
-                //TODO
+                if (e.toChannel) {
+                    if (e.toChannel.parent()) {
+                        if (e.toChannel.getClientCount() === 1) {
+                            const sectionName = this.getSectionNameFromParent(e.toChannel.parent().id());
+                            if (sectionName) {
+                                this.handleNewFilledChannel(sectionName);
+                            }
+                        }
+                    }
+                }
             });
 
+            /*
             event.on("channelDelete", e => {
+                if (!e.invoker) return;
                 if (e.invoker.id() === backend.getBotClientID()) return;
                 const sectionName = this.getSectionNameFromParent(e.channel.id());
                 if (sectionName) {
-                    this.channelSections.get(sectionName).deleteChannel(e.channel.id());
+                    this.handleManualDeletedChannel(sectionName, e.channel.id());
                 }
             });
 
             event.on("channelCreate", e => {
+                if (!e.invoker) return;
                 if (e.invoker.id() === backend.getBotClientID()) return;
                 const sectionName = this.getSectionNameFromParent(e.channel.id());
                 if (sectionName) {
                     e.channel.delete();
                 }
             });
+            */
         }
 
         /**
@@ -491,11 +543,9 @@ registerPlugin({
          * @returns {string|false}
          */
         getSectionNameFromParent(channelParentId) {
-            const channelSectionsIter = this.channelSections.values();
-            let channelSection = channelSectionsIter.next().value;
-            while (channelSection) {
+            for (let channelSection of this.channelSections.values()) {
                 if (channelSection.channelSettings.parent_channel_id === channelParentId) {
-                    return channelSection.channelSection.channelSettings.name;
+                    return channelSection.channelSettings.name;
                 }
             }
             return false;
@@ -504,237 +554,17 @@ registerPlugin({
         handleNewEmptyChannel(sectionName, channelId) {
             this.channelSections.get(sectionName).handleNewEmptyChannel(channelId);
         }
+
+        handleNewFilledChannel(sectionName) {
+            this.channelSections.get(sectionName).handleNewFilledChannel();
+        }
+
+        handleManualDeletedChannel(sectionName, channelId) {
+            this.channelSections.get(sectionName).handleManualDeletedChannel(channelId);
+        }
     }
 
-    /**
-    * Returns an Array of all ChannelSection passed in from the Config
-    * @param {*} MANAGED_SECTIONS
-    * @returns {[ChannelSectionSettings]}
-    */
-    function loadChannelSections(MANAGED_SECTIONS) {
-        return MANAGED_SECTIONS.map(section => loadChannelSection(section));
-    }
-    /**
-     * Returns one ChannelSection passed in from the Object in the Configs Array
-     * @param {*} MANAGED_SECTION 
-     * @returns {ChannelSectionSettings}
-     */
-    function loadChannelSection(MANAGED_SECTION) {
-        const type = parseInt(MANAGED_SECTION.SECTION_TYPE, 10);
-        const min_channels = MANAGED_SECTION.SECTION_MIN_CHANNEL_ENABLED ?
-            MANAGED_SECTION.SECTION_MIN_CHANNELS : false;
-        const max_channels = MANAGED_SECTION.SECTION_MAX_CHANNEL_ENABLED ?
-            MANAGED_SECTION.SECTION_MAX_CHANNELS : false;
-        const channel_codec = parseInt(MANAGED_SECTION.CHANNEL_CODEC, 10);
-        const channel_codec_quality = parseInt(MANAGED_SECTION.CHANNEL_CODEC_QUALITY, 10) + 1;
-        const channel_permissions = MANAGED_SECTION.CHANNEL_PERMISSIONS ?
-            MANAGED_SECTION.CHANNEL_PERMISSIONS.map(
-                channel_permission => new ChannelPermission(channel_permission.PERMISSION_ID, channel_permission.PERMISSION_VALUE)
-            ) :
-            false;
-        if (type !== SECTION_TYPES.NUMBERED) throw new Error("Unsupportet Section Type");
-        const channel_prefix = MANAGED_SECTION.CHANNEL_PREFIX_ENABLED ?
-            MANAGED_SECTION.CHANNEL_PREFIX : false;
-        const channel_prefix_spacer = channel_prefix ?
-            MANAGED_SECTION.CHANNEL_PREFIX_ENABLED : false;
-        const channel_suffix = MANAGED_SECTION.CHANNEL_SUFFIX_ENABLED ?
-            MANAGED_SECTION.CHANNEL_SUFFIX : false;
-        const channel_suffix_spacer = channel_suffix ?
-            MANAGED_SECTION.CHANNEL_SUFFIX_ENABLED : false;
-        return new NumberedChannelSectionSettings(
-            MANAGED_SECTION.SECTION_NAME,
-            MANAGED_SECTION.SECTION_PARENT_CHANNEL,
-            min_channels,
-            max_channels,
-            channel_prefix,
-            channel_prefix_spacer,
-            channel_suffix,
-            channel_suffix_spacer,
-            channel_codec,
-            channel_codec_quality,
-            channel_permissions
-        );
-    }
-    /**
-     * Returns all Channels of a Parent Channel
-     * @param {string} parent_channel_id 
-     * @returns
-     */
-    function loadSectionChannels(parent_channel_id) {
-        return backend.getChannels().filter(channel => {
-            if (!channel.parent()) return false;
-            return channel.parent().id() === parent_channel_id;
-        });
-    }
-    function deleteChannel(channels, channel_id) {
-        const channels_after_delete = channels.filter(channel => channel.id() !== channel_id);
-        channels.filter(channel => channel.id() === channel_id)[0].delete();
-        return channels_after_delete;
-    }
-    /**
-     * Returns all Channels which aren't empty after deleting all empty channels.
-     * @param {[*]} channels 
-     */
-    function deleteEmptyChannels(channels) {
-        const channels_after_delete = channels.filter(channel => channel.getClientCount() > 0);
-        channels.filter(channel => channel.getClientCount() < 1)
-            .forEach(channel => channel.delete());
-        return channels_after_delete;
-    }
-    function generateChannelName(number, prefix, prefix_spacer, suffix, suffix_spacer) {
-        const channel_prefix = prefix ? prefix : "";
-        const channel_prefix_spacer = prefix_spacer ? " " : "";
-        const channel_suffix_spacer = suffix_spacer ? " " : "";
-        const channel_suffix = suffix ? suffix : "";
-        return channel_prefix + channel_prefix_spacer + number + channel_suffix_spacer + channel_suffix;
-    }
-    function createChannel(
-        channels, max_channels,
-        name_prefix, name_prefix_spacer, name_suffix, name_suffix_spacer,
-        parent_channel_id,
-        channel_codec, channel_codec_quality,
-        channel_permissions
-    ) {
-        if (max_channels) if (!(channels.length < max_channels)) return channels;
-        const channelParamas = {
-            name: generateChannelName(channels.length + 1, name_prefix, name_prefix_spacer, name_suffix, name_suffix_spacer),
-            parent: parent_channel_id,
-            description: "",
-            topic: "",
-            password: "",
-            codec: channel_codec,
-            codecQuality: channel_codec_quality,
-            encrypted: true,
-            permanent: true,
-            semipermanent: false,
-            maxClients: -1
-        };
-        if (backend.getChannels().filter(channel => channel.name() === channelParamas.name).length > 0)
-            channelParamas.name = "_" + channelParamas.name;
-        const channel = backend.createChannel(channelParamas);
-        if (channel_permissions) {
-            channel_permissions.forEach(channel_permission => {
-                const permission = channel.addPermission(channel_permission.id);
-                permission.setValue(channel_permission.value);
-                permission.save();
-            });
-        }
-        channels.push(channel);
-        return channels;
-    }
-    function createMissingChannels(
-        channels, min_channels, max_channels,
-        name_prefix, name_prefix_spacer, name_suffix, name_suffix_spacer,
-        parent_channel_id,
-        channel_codec, channel_codec_quality,
-        channel_permissions
-    ) {
-        if (!min_channels) return channels;
-        if (!(channels.length < min_channels)) return channels;
-        while (channels.length < min_channels) {
-            channels = createChannel(
-                channels, max_channels,
-                name_prefix, name_prefix_spacer, name_suffix, name_suffix_spacer,
-                parent_channel_id,
-                channel_codec, channel_codec_quality,
-                channel_permissions
-            );
-        }
-        return channels;
-    }
-    function hasEmptyChannel(channels) {
-        return channels.filter(channel => channel.getClientCount() < 1).length > 0;
-    }
-    function createEmptyChannel(
-        channels, max_channels,
-        name_prefix, name_prefix_spacer, name_suffix, name_suffix_spacer,
-        parent_channel_id,
-        channel_codec, channel_codec_quality,
-        channel_permissions
-    ) {
-        if (hasEmptyChannel(channels)) return channels;
-        return createChannel(
-            channels, max_channels,
-            name_prefix, name_prefix_spacer, name_suffix, name_suffix_spacer,
-            parent_channel_id,
-            channel_codec, channel_codec_quality,
-            channel_permissions
-        );
-    }
-    function renameChannels(
-        channels, name_prefix, name_prefix_spacer, name_suffix, name_suffix_spacer
-    ) {
-        channels.sort((channel_a, channel_b) => channel_a.position() - channel_b.position())
-            .forEach((channel, index) => {
-                const correct_channel_name = generateChannelName(index + 1, name_prefix, name_prefix_spacer, name_suffix, name_suffix_spacer);
-                if (channel.name() !== correct_channel_name) channel.setName(correct_channel_name);
-            });
-    }
+    const channelSectionManaer = new ChannelSectionManager(MANAGED_SECTIONS);
+    channelSectionManaer.run();
 
-    const channel_sections = loadChannelSections(MANAGED_SECTIONS);
-
-    channel_sections.forEach(section => {
-        section.channels = loadSectionChannels(section.parent_channel_id);
-        section.channels = deleteEmptyChannels(section.channels);
-        section.channels = createMissingChannels(
-            section.channels, section.min_channels, section.max_channels,
-            section.channel_prefix, section.channel_prefix_spacer, section.channel_suffix, section.channel_suffix_spacer,
-            section.parent_channel_id,
-            section.channel_codec, section.channel_codec_quality,
-            section.channel_permissions
-        );
-        section.channels = createEmptyChannel(
-            section.channels, section.max_channels,
-            section.channel_prefix, section.channel_prefix_spacer, section.channel_suffix, section.channel_suffix_spacer,
-            section.parent_channel_id,
-            section.channel_codec, section.channel_codec_quality,
-            section.channel_permissions
-        );
-        renameChannels(section.channels, section.channel_prefix, section.channel_prefix_spacer, section.channel_suffix, section.channel_suffix_spacer);
-    });
-
-    event.on("clientMove", e => {
-        if (e.fromChannel) {
-            if (e.fromChannel.parent()) {
-                channel_sections.filter(section => section.parent_channel_id === e.fromChannel.parent().id())
-                    .forEach(section => {
-                        if (e.fromChannel.getClientCount() < 1) {
-                            section.channels = deleteChannel(section.channels, e.fromChannel.id());
-                            section.channels = createMissingChannels(
-                                section.channels, section.min_channels, section.max_channels,
-                                section.channel_prefix, section.channel_prefix_spacer, section.channel_suffix, section.channel_suffix_spacer,
-                                section.parent_channel_id,
-                                section.channel_codec, section.channel_codec_quality,
-                                section.channel_permissions
-                            );
-                            section.channels = createEmptyChannel(
-                                section.channels, section.max_channels,
-                                section.channel_prefix, section.channel_prefix_spacer, section.channel_suffix, section.channel_suffix_spacer,
-                                section.parent_channel_id,
-                                section.channel_codec, section.channel_codec_quality,
-                                section.channel_permissions
-                            );
-                            renameChannels(section.channels, section.channel_prefix, section.channel_prefix_spacer, section.channel_suffix, section.channel_suffix_spacer);
-                        }
-                    });
-            }
-        }
-        if (e.toChannel) {
-            if (e.toChannel.parent()) {
-                channel_sections.filter(section => section.parent_channel_id === e.toChannel.parent().id())
-                    .forEach(section => {
-                        if (e.toChannel.getClientCount() === 1) {
-                            section.channels = createEmptyChannel(
-                                section.channels, section.max_channels,
-                                section.channel_prefix, section.channel_prefix_spacer, section.channel_suffix, section.channel_suffix_spacer,
-                                section.parent_channel_id,
-                                section.channel_codec, section.channel_codec_quality,
-                                section.channel_permissions
-                            );
-                            renameChannels(section.channels, section.channel_prefix, section.channel_prefix_spacer, section.channel_suffix, section.channel_suffix_spacer);
-                        }
-                    });
-            }
-        }
-    });
 });
