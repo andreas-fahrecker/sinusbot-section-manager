@@ -363,9 +363,10 @@ registerPlugin({
             sleep(100);
             //#region Create Channels
             {
-                while (this.managedChannels.size < this.channelSettings.min_channels) {
+                do {
                     this.createChannel();
                 }
+                while (this.managedChannels.size < this.channelSettings.min_channels);
             }
             //#endregion 
         }
