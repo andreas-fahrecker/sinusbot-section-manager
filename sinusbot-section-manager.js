@@ -378,10 +378,12 @@ registerPlugin({
                 const delChannelIndex = this.getIntexOfId(channelId);
                 const delChannelPos = this.getPosOfId(channelId);
                 this.deleteChannel(channelId);
-                const moveArray = Array.from(this.managedChannels.values()).sort((c1, c2) => this.getIndexOfName(c1.name()) - this.getIndexOfName(c2.name()));
+                const moveChannel = Array.from(this.managedChannels.values()).sort((c1, c2) => this.getIndexOfName(c1.name()) - this.getIndexOfName(c2.name()))[this.managedChannels.size - 1];
                 console.log("channel pos: " + delChannelPos);
-                moveArray[moveArray.length - 1].setPosition(delChannelPos);
-                moveArray[moveArray.length - 1].setName(this.genNameOfIndex(delChannelIndex));
+                moveChannel.setPosition(delChannelPos);
+                if (delChannelIndex < this.getIndexOfName(moveChannel.name())) {
+                    moveChannel.setName(this.genNameOfIndex(delChannelIndex));
+                }
             }
         }
 
@@ -427,7 +429,7 @@ registerPlugin({
             if (position) {
                 channelParams.position = position;
             }
-            for(let i = 0; i < 10; i++) {
+            for (let i = 0; i < 10; i++) {
                 if (!this.doesChannelExist(channelParams.name)) break;
                 sleep(5);
             }
