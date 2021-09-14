@@ -357,9 +357,10 @@ registerPlugin({
                     if (!channel.parent()) return false;
                     return channel.parent().id() === this.channelSettings.parent_channel_id;
                 });
-                channelsToDelete.forEach(channel => {channel.delete(); sleep(10);});
+                channelsToDelete.forEach(channel => channel.delete());
             }
             //#endregion
+            sleep(100);
             //#region Create Channels
             {
                 while (this.managedChannels.size < this.channelSettings.min_channels) {
@@ -377,7 +378,6 @@ registerPlugin({
                 const delChannelIndex = this.getIntexOfId(channelId);
                 const delChannelPos = this.getPosOfId(channelId);
                 this.deleteChannel(channelId);
-                sleep(100);
                 const moveArray = Array.from(this.managedChannels.values()).sort((c1, c2) => this.getIndexOfName(c1.name()) - this.getIndexOfName(c2.name()));
                 console.log("channel pos: " + delChannelPos);
                 moveArray[moveArray.length - 1].setPosition(delChannelPos);
@@ -427,11 +427,14 @@ registerPlugin({
             if (position) {
                 channelParams.position = position;
             }
-            if (backend.getChannels().filter(channel => channel.name() === channelParams.name).length > 0) {
+            for(let i = 0; i < 10; i++) {
+                if (!this.doesChannelExist(channelParams.name)) break;
+                sleep(5);
+            }
+            if (this.doesChannelExist(channelParams.name)) {
                 channelParams.name = channelParams.name + "_Error";
             }
             const channel = backend.createChannel(channelParams);
-            sleep(10);
             this.managedChannels.set(channel.id(), channel);
             if (this.channelSettings.channel_permissions) {
                 this.channelSettings.channel_permissions.forEach(channel_permission => {
@@ -446,7 +449,6 @@ registerPlugin({
         deleteChannel(channelId) {
             if (!this.managedChannels.has(channelId)) return false;
             this.managedChannels.get(channelId).delete();
-            sleep(10);
             return this.managedChannels.delete(channelId);
         }
 
@@ -464,6 +466,10 @@ registerPlugin({
 
         getPosOfId(channelId) {
             return this.managedChannels.get(channelId).position();
+        }
+
+        doesChannelExist(name) {
+            return backend.getChannels().filter(channel => channel.name() === name).length > 0;
         }
     }
 
@@ -492,7 +498,10 @@ registerPlugin({
         }
 
         run() {
-            this.channelSections.forEach(channelSection => channelSection.initiateSection());
+            this.channelSections.forEach(channelSection => {
+                channelSection.initiateSection();
+                sleep(100);
+            });
 
             event.on("clientMove", e => {
                 if (e.fromChannel) {
