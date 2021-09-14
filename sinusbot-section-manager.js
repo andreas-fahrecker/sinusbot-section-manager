@@ -432,7 +432,7 @@ registerPlugin({
             }
             for (let i = 0; i < 10; i++) {
                 if (!this.doesChannelExist(channelParams.name)) break;
-                sleep(5);
+                sleep(10);
             }
             if (this.doesChannelExist(channelParams.name)) {
                 channelParams.name = channelParams.name + "_Error";
